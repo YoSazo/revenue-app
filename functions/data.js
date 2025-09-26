@@ -1,7 +1,5 @@
-// This file is your new backend, formatted as a Netlify Function.
 const bizSdk = require('facebook-nodejs-business-sdk');
 
-// Environment variables are set in the Netlify UI, not a .env file.
 const accessToken = process.env.FB_ACCESS_TOKEN;
 const adAccountId = process.env.FB_AD_ACCOUNT_ID;
 
@@ -16,9 +14,7 @@ const getDatePreset = (period) => {
     }
 };
 
-// This is the main function that Netlify will run.
 exports.handler = async (event) => {
-    // 'event' contains information about the incoming request.
     const period = event.queryStringParameters.period || 'today';
 
     if (!accessToken || !adAccountId) {
@@ -30,7 +26,9 @@ exports.handler = async (event) => {
 
     try {
         const account = new AdAccount(adAccountId);
-        const fields = ['spend', 'purchase_roas', 'impressions', 'ctr', 'cpa'];
+        // --- THIS IS THE LINE WE FIXED ---
+        // We changed 'cpa' to the correct name: 'cost_per_action_type'
+        const fields = ['spend', 'purchase_roas', 'impressions', 'ctr', 'cost_per_action_type'];
         const params = { 'level': 'account', 'date_preset': getDatePreset(period) };
         
         const result = await account.getInsights(fields, params);
@@ -48,12 +46,18 @@ exports.handler = async (event) => {
         const roas = stats.purchase_roas ? parseFloat(stats.purchase_roas[0].value) : 0;
         const totalRevenue = spend * roas;
 
+        // --- AND WE FIXED HOW TO READ THE CPA DATA HERE ---
+        // The CPA data comes in an array, so we safely extract the first value.
+        const cpaValue = stats.cost_per_action_type && stats.cost_per_action_type.length > 0
+            ? parseFloat(stats.cost_per_action_type[0].value)
+            : 0;
+
         const formattedData = {
             totalRevenue: totalRevenue,
             hotels: [{
                 name: 'Home Place Suites',
                 location: 'Bartlesville',
-                cpa: stats.cpa ? parseFloat(stats.cpa) : 0,
+                cpa: cpaValue, // Use the correctly extracted value
                 ctr: stats.ctr ? parseFloat(stats.ctr) : 0,
                 reach: stats.impressions ? parseInt(stats.impressions, 10) : 0,
             }],
