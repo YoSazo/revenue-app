@@ -3,6 +3,14 @@ const bizSdk = require('facebook-nodejs-business-sdk');
 const accessToken = process.env.FB_ACCESS_TOKEN;
 const adAccountId = process.env.FB_AD_ACCOUNT_ID;
 
+// --- EDIT THIS LIST TO ADD OR REMOVE CAMPAIGN IDs ---
+const TARGET_CAMPAIGN_IDS = [
+  '6898612187193',
+  '6898612186993',
+  '6898612186793',
+];
+// ----------------------------------------------------
+
 const Api = bizSdk.FacebookAdsApi.init(accessToken);
 const AdAccount = bizSdk.AdAccount;
 
@@ -26,10 +34,20 @@ exports.handler = async (event) => {
 
     try {
         const account = new AdAccount(adAccountId);
-        // --- THIS IS THE LINE WE FIXED ---
-        // We changed 'cpa' to the correct name: 'cost_per_action_type'
         const fields = ['spend', 'purchase_roas', 'impressions', 'ctr', 'cost_per_action_type'];
-        const params = { 'level': 'account', 'date_preset': getDatePreset(period) };
+        
+        // --- THIS IS THE NEW PART ---
+        // We add a 'filtering' parameter to specify the campaign IDs
+        const params = { 
+            'level': 'account', 
+            'date_preset': getDatePreset(period),
+            'filtering': [{
+                field: 'campaign.id',
+                operator: 'IN',
+                value: TARGET_CAMPAIGN_IDS
+            }]
+        };
+        // -----------------------------
         
         const result = await account.getInsights(fields, params);
         
@@ -46,8 +64,6 @@ exports.handler = async (event) => {
         const roas = stats.purchase_roas ? parseFloat(stats.purchase_roas[0].value) : 0;
         const totalRevenue = spend * roas;
 
-        // --- AND WE FIXED HOW TO READ THE CPA DATA HERE ---
-        // The CPA data comes in an array, so we safely extract the first value.
         const cpaValue = stats.cost_per_action_type && stats.cost_per_action_type.length > 0
             ? parseFloat(stats.cost_per_action_type[0].value)
             : 0;
@@ -57,7 +73,7 @@ exports.handler = async (event) => {
             hotels: [{
                 name: 'Home Place Suites',
                 location: 'Bartlesville',
-                cpa: cpaValue, // Use the correctly extracted value
+                cpa: cpaValue,
                 ctr: stats.ctr ? parseFloat(stats.ctr) : 0,
                 reach: stats.impressions ? parseInt(stats.impressions, 10) : 0,
             }],
