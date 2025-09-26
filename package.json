@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "facebook-nodejs-business-sdk": "^18.0.5"
+    "facebook-nodejs-business-sdk": "19.0.0"
   }
 }
