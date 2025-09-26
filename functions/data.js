@@ -76,6 +76,9 @@ exports.handler = async (event) => {
 
         // Extracting all the detailed actions using our helper function
         const actions = stats.actions;
+        const standardPurchases = getActionValue(actions, 'purchase');
+        const pixelPurchases = getActionValue(actions, 'offsite_conversion.fb_pixel_purchase');
+        const totalPurchases = standardPurchases + pixelPurchases;
         const detailedMetrics = {
             lpv: getActionValue(actions, 'landing_page_view'),
             searches: getActionValue(actions, 'search'),
