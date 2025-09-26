@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Revenue Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .button-shadow {
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .active-tab {
+            background-color: #34D399; /* Emerald 400 */
+            color: white;
+            font-weight: 600;
+        }
+        .inactive-tab {
+            background-color: white;
+            color: #374151; /* Gray 700 */
+        }
+        .phone-top {
+            width: 150px;
+            height: 30px;
+            background-color: black;
+            border-radius: 0 0 20px 20px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+         .home-indicator {
+            width: 134px;
+            height: 5px;
+            background-color: black;
+            border-radius: 100px;
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-200 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-sm h-[850px] bg-gray-100 rounded-[50px] border-[12px] border-black overflow-hidden relative shadow-2xl">
+        <div class="phone-top"></div>
+
+        <div id="app" class="h-full w-full bg-white pt-12 p-4 overflow-y-auto">
+            <div class="px-2">
+                <!-- Notification Bell -->
+                <div class="flex justify-end mb-4">
+                    <button id="enable-notifications" class="text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    </button>
+                </div>
+                
+                <div class="flex justify-center space-x-2 mb-6">
+                    <button id="today" class="time-btn flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-300 active-tab button-shadow">Today</button>
+                    <button id="yesterday" class="time-btn flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-300 inactive-tab border border-gray-200">Yesterday</button>
+                    <button id="thisWeek" class="time-btn flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-300 inactive-tab border border-gray-200">This Week</button>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 text-center card-shadow mb-6 border border-gray-200">
+                    <h2 class="text-gray-500 text-lg font-medium">Total Revenue</h2>
+                    <p id="total-revenue" class="text-4xl md:text-5xl font-bold text-gray-800 my-2">$0.00</p>
+                    <div class="inline-block bg-white border border-gray-200 rounded-full px-5 py-2 mt-2">
+                        <p id="commission" class="text-gray-600 text-sm">10% Commission: $0.00</p>
+                    </div>
+                </div>
+
+                <div class="text-center mb-6">
+                    <button class="bg-emerald-400 text-white py-2 px-6 rounded-full text-sm font-semibold button-shadow">Top Earning Hotels</button>
+                </div>
+
+                <div id="hotels-list" class="space-y-4">
+                    <!-- Hotel cards will be injected here -->
+                </div>
+            </div>
+        </div>
+        <div class="home-indicator"></div>
+    </div>
+
+    <!-- Custom notification message box -->
+    <div id="notification-box" class="hidden fixed top-5 right-5 bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm z-50">
+        <p id="notification-message"></p>
+    </div>
+
+
+    <script>
+        // --- MOCK DATA (REMOVED) ---
+        // This data will now be fetched from our server
+
+        const totalRevenueEl = document.getElementById('total-revenue');
+        const commissionEl = document.getElementById('commission');
+        const hotelsListEl = document.getElementById('hotels-list');
+        const timeButtons = document.querySelectorAll('.time-btn');
+        const notificationButton = document.getElementById('enable-notifications');
+        const notificationBox = document.getElementById('notification-box');
+        const notificationMessage = document.getElementById('notification-message');
+        
+        // --- NOTIFICATIONS ---
+        function showMessage(message) {
+            notificationMessage.textContent = message;
+            notificationBox.classList.remove('hidden');
+            setTimeout(() => {
+                notificationBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        async function enableNotifications() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                showMessage('Push Notifications are not supported by your browser.');
+                return;
+            }
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                showMessage('Notifications enabled!');
+                notificationButton.classList.add('text-emerald-500');
+                // We would then get the subscription and send it to our server.
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    // You need a VAPID public key from the server
+                    applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY' 
+                });
+
+                // Send the subscription to the backend
+                await fetch('/api/subscribe', {
+                    method: 'POST',
+                    body: JSON.stringify(subscription),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+            } else {
+                showMessage('You have blocked notifications.');
+            }
+        }
+        
+        notificationButton.addEventListener('click', enableNotifications);
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service worker registered.'))
+                    .catch(err => console.log('Service worker registration failed: ', err));
+            });
+        }
+
+
+        // --- DASHBOARD LOGIC ---
+        const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
+        
+        const renderHotelCard = (hotel) => `
+            <div class="bg-white rounded-3xl p-4 card-shadow border border-gray-200 flex items-center justify-between space-x-4">
+                <div>
+                    <p class="font-semibold text-gray-800">${hotel.name}</p>
+                    <p class="text-sm text-gray-500">${hotel.location}</p>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-3 text-xs text-right text-gray-600">
+                    <p><strong>CPA:</strong> ${formatCurrency(hotel.cpa)}</p>
+                    <p><strong>CTR:</strong> ${hotel.ctr}%</p>
+                    <p><strong>Reach:</strong> ${formatNumber(hotel.reach)}</p>
+                </div>
+            </div>`;
+
+        const updateDashboard = async (period) => {
+            // Fetch data from our new backend server
+            try {
+                const response = await fetch(`/api/data?period=${period}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+
+                totalRevenueEl.textContent = formatCurrency(data.totalRevenue);
+                commissionEl.textContent = `10% Commission: ${formatCurrency(data.totalRevenue * 0.10)}`;
+                hotelsListEl.innerHTML = data.hotels.map(renderHotelCard).join('');
+            } catch (error) {
+                console.error('Failed to fetch dashboard data:', error);
+                showMessage('Could not load data from server.');
+            }
+            
+            // This part for styling the buttons remains the same
+            timeButtons.forEach(button => {
+                button.classList.remove('active-tab', 'button-shadow');
+                button.classList.add('inactive-tab', 'border', 'border-gray-200');
+                if (button.id === period) {
+                    button.classList.add('active-tab', 'button-shadow');
+                    button.classList.remove('inactive-tab', 'border', 'border-gray-200');
+                }
+            });
+        };
+
+        timeButtons.forEach(button => button.addEventListener('click', () => updateDashboard(button.id)));
+
+        window.addEventListener('load', () => {
+            updateDashboard('today');
+            // Check initial notification status
+            if ('Notification' in window && Notification.permission === 'granted') {
+                notificationButton.classList.add('text-emerald-500');
+            }
+        });
+    </script>
+
+</body>
+</html>
+
