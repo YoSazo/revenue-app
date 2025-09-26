@@ -1,0 +1,11 @@
+# This file tells Netlify how to build and deploy your site, including functions.
+[build]
+  # Directory where your serverless functions are located
+  functions = "functions"
+
+# This rule redirects requests from your frontend's /api/data URL 
+# to your new serverless function.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

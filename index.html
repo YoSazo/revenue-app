@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.json">
     <style>
         body {
@@ -58,7 +57,6 @@
 
         <div id="app" class="h-full w-full bg-white pt-12 p-4 overflow-y-auto">
             <div class="px-2">
-                <!-- Notification Bell -->
                 <div class="flex justify-end mb-4">
                     <button id="enable-notifications" class="text-gray-400 hover:text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -84,23 +82,18 @@
                 </div>
 
                 <div id="hotels-list" class="space-y-4">
-                    <!-- Hotel cards will be injected here -->
-                </div>
+                    </div>
             </div>
         </div>
         <div class="home-indicator"></div>
     </div>
 
-    <!-- Custom notification message box -->
     <div id="notification-box" class="hidden fixed top-5 right-5 bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm z-50">
         <p id="notification-message"></p>
     </div>
 
 
     <script>
-        // --- MOCK DATA (REMOVED) ---
-        // This data will now be fetched from our server
-
         const totalRevenueEl = document.getElementById('total-revenue');
         const commissionEl = document.getElementById('commission');
         const hotelsListEl = document.getElementById('hotels-list');
@@ -127,15 +120,11 @@
             if (permission === 'granted') {
                 showMessage('Notifications enabled!');
                 notificationButton.classList.add('text-emerald-500');
-                // We would then get the subscription and send it to our server.
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
-                    // You need a VAPID public key from the server
                     applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY' 
                 });
-
-                // Send the subscription to the backend
                 await fetch('/api/subscribe', {
                     method: 'POST',
                     body: JSON.stringify(subscription),
@@ -151,7 +140,6 @@
         
         notificationButton.addEventListener('click', enableNotifications);
         
-        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -159,7 +147,6 @@
                     .catch(err => console.log('Service worker registration failed: ', err));
             });
         }
-
 
         // --- DASHBOARD LOGIC ---
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -179,7 +166,6 @@
             </div>`;
 
         const updateDashboard = async (period) => {
-            // Fetch data from our new backend server
             try {
                 const response = await fetch(`/api/data?period=${period}`);
                 if (!response.ok) {
@@ -195,7 +181,6 @@
                 showMessage('Could not load data from server.');
             }
             
-            // This part for styling the buttons remains the same
             timeButtons.forEach(button => {
                 button.classList.remove('active-tab', 'button-shadow');
                 button.classList.add('inactive-tab', 'border', 'border-gray-200');
@@ -210,7 +195,6 @@
 
         window.addEventListener('load', () => {
             updateDashboard('today');
-            // Check initial notification status
             if ('Notification' in window && Notification.permission === 'granted') {
                 notificationButton.classList.add('text-emerald-500');
             }
@@ -219,4 +203,3 @@
 
 </body>
 </html>
-
