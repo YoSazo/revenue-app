@@ -8,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        th { @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider; }
-        td { @apply px-4 py-3 whitespace-nowrap text-sm text-gray-800; }
+        th { @apply px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider; }
+        td { @apply px-6 py-4 whitespace-nowrap text-sm text-gray-800; }
         .card { @apply bg-white rounded-xl shadow-lg overflow-hidden; }
-        .stat-card { @apply bg-gray-50 p-6 rounded-lg shadow-sm; }
+        .stat-card { @apply bg-gray-50 p-6 rounded-lg shadow-sm h-full; }
         .stat-title { @apply text-sm font-medium text-gray-500; }
         .stat-value { @apply mt-1 text-3xl font-semibold text-gray-900; }
     </style>
@@ -19,63 +19,16 @@
 <body class="bg-gray-100">
 
     <div class="container mx-auto p-8 space-y-10">
-        <!-- THIS IS THE FIX: Added flex classes to the header -->
         <header class="flex justify-between items-start">
             <div>
                 <h1 class="text-4xl font-bold text-gray-900">Facebook Performance Dashboard</h1>
                 <p class="mt-2 text-lg text-gray-600">Extensive analysis of campaign performance and user funnels for the week.</p>
             </div>
-            <!-- This button will now correctly appear in the top right -->
             <button id="copy-button" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 Copy for AI
             </button>
-
-            <div class="flex p-1 bg-gray-200 rounded-lg">
-                    <button id="pc-view-btn" class="view-toggle-active text-xs font-bold py-1 px-3 rounded-md transition">PC</button>
-                    <button id="mobile-view-btn" class="view-toggle-inactive text-xs font-bold py-1 px-3 rounded-md transition">Mobile</button>
-                </div>
-                 <!-- NEW: Refresh Button -->
-                <button id="refresh-button" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition flex items-center gap-2 w-full sm:w-auto justify-center">
-                    <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                    <span id="refresh-text">Refresh</span>
-                </button>
-            </div>
-
         </header>
-
-        <div id="desktop-view">
-            <div class="space-y-10">
-                <div id="summary-section-desktop" class="hidden">
-                     <!-- Desktop summary cards will be injected here -->
-                </div>
-                <div id="data-display-section-desktop" class="space-y-10">
-                    <div class="card"><h2 class="text-2xl font-bold text-gray-800 p-6 border-b">Daily Campaign Breakdown</h2><div class="overflow-x-auto"><table class="min-w-full divide-y"><thead class="bg-gray-50"><tr><th>Date</th><th>Campaign</th><th>Spend</th><th>ROAS</th><th>Cost per Purchase</th><th>CPC</th><th>CPM</th><th>Impressions</th><th>Reach</th><th>Frequency</th><th>CTR</th></tr></thead><tbody id="delivery-table-body" class="divide-y"></tbody></table></div></div>
-                    <div class="card"><h2 class="text-2xl font-bold text-gray-800 p-6 border-b">Daily Funnel Performance</h2><div class="overflow-x-auto"><table class="min-w-full divide-y"><thead class="bg-gray-50"><tr><th>Date</th><th>Campaign</th><th class="text-blue-600">LP Views</th><th class="text-blue-600">Searches</th><th class="text-blue-600">Adds to Cart</th><th class="text-blue-600">Checkouts</th><th class="text-blue-600">Payment Info</th><th class="text-blue-600">Purchases</th></tr></thead><tbody id="funnel-table-body" class="divide-y"></tbody></table></div></div>
-                </div>
-                <div id="analysis-section-desktop" class="hidden">
-                    <!-- Desktop analysis section will be injected here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Container for Mobile View -->
-        <div id="mobile-view" class="hidden">
-            <div class="space-y-6">
-                <div id="summary-section-mobile" class="hidden grid grid-cols-2 gap-4">
-                    <!-- Mobile summary cards will be injected here -->
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Daily Performance</h2>
-                    <div id="mobile-cards-container" class="space-y-4">
-                        <!-- Mobile data cards will be injected here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="loading-state" class="p-8 text-center text-gray-500"><p>Loading extensive performance data...</p></div>
-    </div>
 
         <div id="summary-section" class="hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Weekly Summary</h2>
@@ -87,78 +40,24 @@
             </div>
         </div>
 
-        <!-- NEW: TWO SEPARATE CARDS FOR DATA -->
         <div id="data-display-section" class="space-y-10">
-            <!-- Card 1: Daily Campaign Breakdown -->
             <div class="card">
                 <h2 class="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Daily Campaign Breakdown</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th>Date</th><th>Campaign</th><th>Spend</th><th>ROAS</th><th>Cost per Purchase</th>
-                                <th>CPC</th><th>CPM</th><th>Impressions</th><th>Reach</th><th>Frequency</th><th>CTR</th>
-                            </tr>
-                        </thead>
-                        <tbody id="delivery-table-body" class="bg-white divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
+                <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Date</th><th>Campaign</th><th>Spend</th><th>ROAS</th><th>Cost per Purchase</th><th>CPC</th><th>CPM</th><th>Impressions</th><th>Reach</th><th>Frequency</th><th>CTR</th></tr></thead><tbody id="delivery-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div>
             </div>
-
-            <!-- Card 2: Daily Funnel Performance -->
             <div class="card">
                 <h2 class="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Daily Funnel Performance</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th>Date</th><th>Campaign</th>
-                                <th class="text-blue-600">LP Views</th><th class="text-blue-600">Searches</th>
-                                <th class="text-blue-600">Adds to Cart</th><th class="text-blue-600">Checkouts</th>
-                                <th class="text-blue-600">Payment Info</th><th class="text-blue-600">Purchases</th>
-                            </tr>
-                        </thead>
-                        <tbody id="funnel-table-body" class="bg-white divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
+                <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Date</th><th>Campaign</th><th class="text-blue-600">LP Views</th><th class="text-blue-600">Searches</th><th class="text-blue-600">Adds to Cart</th><th class="text-blue-600">Checkouts</th><th class="text-blue-600">Payment Info</th><th class="text-blue-600">Purchases</th></tr></thead><tbody id="funnel-table-body" class="bg-white divide-y divide-gray-200"></tbody></table></div>
             </div>
              <div id="loading-state" class="p-8 text-center text-gray-500"><p>Loading extensive performance data...</p></div>
         </div>
-
+        
         <div id="analysis-section" class="hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Performance Analysis</h2>
-            <!-- Changed to lg:grid-cols-3 to accommodate the new card -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Top Performers Card -->
-                <div class="stat-card">
-                    <h3 class="font-bold text-lg mb-4">Top Performers</h3>
-                    <div class="space-y-3 text-sm">
-                        <p><strong>Best Day (by ROAS):</strong> <span id="best-day" class="font-semibold text-green-600"></span></p>
-                        <p><strong>Top Campaign (by ROAS):</strong> <span id="top-campaign" class="font-semibold text-green-600"></span></p>
-                    </div>
-                </div>
-
-                 <div class="stat-card bg-green-50">
-                    <h3 class="font-bold text-lg mb-4 text-green-800">Biggest Improvements (Day-over-Day)</h3>
-                    <div class="space-y-3 text-sm">
-                        <p><strong>Biggest CTR Gain:</strong> <span id="biggest-ctr-gain" class="font-semibold text-green-600"></span></p>
-                        <p><strong>Biggest ROAS Gain:</strong> <span id="biggest-roas-gain" class="font-semibold text-green-600"></span></p>
-                    </div>
-                </div>
-
-                                <div class="stat-card bg-red-50">
-                    <h3 class="font-bold text-lg mb-4 text-red-800">Funnel Drop-off Analysis (Biggest Drop)</h3>
-                    <div class="space-y-3 text-sm">
-                        <!-- Corrected and expanded the funnel stages -->
-                        <p><strong>Landing Page → Searches:</strong> <span id="dropoff-search" class="font-semibold text-red-600"></span></p>
-                        <p><strong>Searches → Adds to Cart:</strong> <span id="dropoff-atc" class="font-semibold text-red-600"></span></p>
-                        <p><strong>Adds to Cart → Checkouts:</strong> <span id="dropoff-ic" class="font-semibold text-red-600"></span></p>
-                        <p><strong>Checkouts → Payment Info:</strong> <span id="dropoff-pia" class="font-semibold text-red-600"></span></p>
-                        <p><strong>Payment Info → Purchases:</strong> <span id="dropoff-purchase" class="font-semibold text-red-600"></span></p>
-                        <p class="pt-2"><strong>Biggest Drop-off Point:</strong> <span id="biggest-dropoff" class="font-bold text-red-700 bg-red-100 px-2 py-1 rounded"></span></p>
-                    </div>
-
-                </div>
+                <div class="stat-card"><h3 class="font-bold text-lg mb-4">Top Performers</h3><div class="space-y-3 text-sm"><p><strong>Best Day (by ROAS):</strong> <span id="best-day" class="font-semibold text-green-600"></span></p><p><strong>Top Campaign (by ROAS):</strong> <span id="top-campaign" class="font-semibold text-green-600"></span></p></div></div>
+                <div class="stat-card bg-green-50"><h3 class="font-bold text-lg mb-4 text-green-800">Biggest Improvements (Day-over-Day)</h3><div class="space-y-3 text-sm"><p><strong>Biggest CTR Gain:</strong> <span id="biggest-ctr-gain" class="font-semibold text-green-600"></span></p><p><strong>Biggest ROAS Gain:</strong> <span id="biggest-roas-gain" class="font-semibold text-green-600"></span></p></div></div>
+                <div class="stat-card bg-red-50"><h3 class="font-bold text-lg mb-4 text-red-800">Funnel Drop-off Analysis (Biggest Drop)</h3><div class="space-y-3 text-sm"><p><strong>Landing Page → Searches:</strong> <span id="dropoff-search" class="font-semibold text-red-600"></span></p><p><strong>Searches → Adds to Cart:</strong> <span id="dropoff-atc" class="font-semibold text-red-600"></span></p><p><strong>Adds to Cart → Checkouts:</strong> <span id="dropoff-ic" class="font-semibold text-red-600"></span></p><p><strong>Checkouts → Payment Info:</strong> <span id="dropoff-pia" class="font-semibold text-red-600"></span></p><p><strong>Payment Info → Purchases:</strong> <span id="dropoff-purchase" class="font-semibold text-red-600"></span></p><p class="pt-2"><strong>Biggest Drop-off Point:</strong> <span id="biggest-dropoff" class="font-bold text-red-700 bg-red-100 px-2 py-1 rounded"></span></p></div></div>
             </div>
         </div>
     </div>
@@ -166,134 +65,27 @@
     <textarea id="copy-data-textarea" class="absolute -left-full"></textarea>
 
     <script>
-        // --- DOM Elements (UPDATED) ---
         const deliveryTableBody = document.getElementById('delivery-table-body');
         const funnelTableBody = document.getElementById('funnel-table-body');
         const loadingState = document.getElementById('loading-state');
-        const pcViewBtn = document.getElementById('pc-view-btn');
-        const mobileViewBtn = document.getElementById('mobile-view-btn');
-        const desktopView = document.getElementById('desktop-view');
-        const mobileView = document.getElementById('mobile-view');
-        const mobileCardsContainer = document.getElementById('mobile-cards-container');
-        const refreshButton = document.getElementById('refresh-button');
-        const refreshText = document.getElementById('refresh-text');
-        const refreshIcon = document.getElementById('refresh-icon');
+        const summarySection = document.getElementById('summary-section');
+        const analysisSection = document.getElementById('analysis-section');
+        const copyButton = document.getElementById('copy-button');
+        const copyTextarea = document.getElementById('copy-data-textarea');
         let rawDataForCopy = [];
 
-        // --- Formatters ---
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
         const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
         const formatPercent = (num) => `${num.toFixed(2)}%`;
         const formatROAS = (num) => `${num.toFixed(2)}x`;
 
-        // --- Render function ---
-        const renderDeliveryRow = (data) => `
-            <tr>
-                <td class="font-medium">${new Date(data.date).toLocaleDateString()}</td>
-                <td class="font-bold">${data.campaignName}</td>
-                <td>${formatCurrency(data.spend)}</td>
-                <td class="font-semibold text-green-700">${formatROAS(data.roas)}</td>
-                <td class="font-semibold text-red-700">${formatCurrency(data.costPerPurchase)}</td>
-                <td>${formatCurrency(data.cpc)}</td>
-                <td>${formatCurrency(data.cpm)}</td>
-                <td>${formatNumber(data.impressions)}</td>
-                <td>${formatNumber(data.reach)}</td>
-                <td>${data.frequency.toFixed(2)}</td>
-                <td class="font-semibold text-indigo-600">${formatPercent(data.ctr)}</td>
-            </tr>
-        `;
+        const renderDeliveryRow = (data) => `<tr><td class="font-medium">${new Date(data.date).toLocaleDateString()}</td><td class="font-bold">${data.campaignName}</td><td>${formatCurrency(data.spend)}</td><td class="font-semibold text-green-700">${formatROAS(data.roas)}</td><td class="font-semibold text-red-700">${formatCurrency(data.costPerPurchase)}</td><td>${formatCurrency(data.cpc)}</td><td>${formatCurrency(data.cpm)}</td><td>${formatNumber(data.impressions)}</td><td>${formatNumber(data.reach)}</td><td>${data.frequency.toFixed(2)}</td><td class="font-semibold text-indigo-600">${formatPercent(data.ctr)}</td></tr>`;
+        const renderFunnelRow = (data) => `<tr><td class="font-medium">${new Date(data.date).toLocaleDateString()}</td><td class="font-bold">${data.campaignName}</td><td class="font-medium text-blue-700">${formatNumber(data.lpv)}</td><td class="font-medium text-blue-700">${formatNumber(data.searches)}</td><td class="font-medium text-blue-700">${formatNumber(data.atc)}</td><td class="font-medium text-blue-700">${formatNumber(data.ic)}</td><td class="font-medium text-blue-700">${formatNumber(data.pia)}</td><td class="font-medium text-blue-700">${formatNumber(data.purchases)}</td></tr>`;
 
-        const renderFunnelRow = (data) => `
-             <tr>
-                <td class="font-medium">${new Date(data.date).toLocaleDateString()}</td>
-                <td class="font-bold">${data.campaignName}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.lpv)}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.searches)}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.atc)}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.ic)}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.pia)}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.purchases)}</td>
-            </tr>
-        `;
-
-        const renderMobileCard = (data) => `<div class="card p-4"><div class="flex justify-between items-start"><div><p class="font-bold text-lg">${data.campaignName}</p><p class="text-sm text-gray-500">${new Date(data.date).toLocaleDateString()}</p></div><div class="text-right"><p class="font-bold text-green-600 text-lg">${formatROAS(data.roas)}</p><p class="text-xs text-gray-500">ROAS</p></div></div><div class="mt-4 grid grid-cols-3 gap-2 text-center"><div class="bg-gray-100 p-2 rounded-lg"><p class="text-xs font-bold text-gray-600">Spend</p><p class="text-sm font-semibold">${formatCurrency(data.spend)}</p></div><div class="bg-gray-100 p-2 rounded-lg"><p class="text-xs font-bold text-gray-600">CTR</p><p class="text-sm font-semibold">${formatPercent(data.ctr)}</p></div><div class="bg-gray-100 p-2 rounded-lg"><p class="text-xs font-bold text-gray-600">Purchases</p><p class="text-sm font-semibold">${formatNumber(data.purchases)}</p></div></div></div>`;
-        
-
-        pcViewBtn.addEventListener('click', () => {
-            desktopView.classList.remove('hidden');
-            mobileView.classList.add('hidden');
-            pcViewBtn.classList.add('view-toggle-active');
-            pcViewBtn.classList.remove('view-toggle-inactive');
-            mobileViewBtn.classList.add('view-toggle-inactive');
-            mobileViewBtn.classList.remove('view-toggle-active');
-        });
-
-        mobileViewBtn.addEventListener('click', () => {
-            mobileView.classList.remove('hidden');
-            desktopView.classList.add('hidden');
-            mobileViewBtn.classList.add('view-toggle-active');
-            mobileViewBtn.classList.remove('view-toggle-inactive');
-            pcViewBtn.classList.add('view-toggle-inactive');
-            pcViewBtn.classList.remove('view-toggle-active');
-        });
-
-
-        // --- Analysis function (UPDATED for new elements) ---
         const runAnalysis = (data) => {
             const totals = data.reduce((acc, row) => {
-                acc.spend += row.spend; acc.revenue += row.spend * row.roas; acc.lpv += row.lpv;
-                acc.searches += row.searches; acc.atc += row.atc; acc.ic += row.ic;
-                acc.pia += row.pia; acc.purchases += row.purchases; return acc;
+                acc.spend += row.spend; acc.revenue += row.spend * row.roas; acc.lpv += row.lpv; acc.searches += row.searches; acc.atc += row.atc; acc.ic += row.ic; acc.pia += row.pia; acc.purchases += row.purchases; return acc;
             }, { spend: 0, revenue: 0, lpv: 0, searches: 0, atc: 0, ic: 0, pia: 0, purchases: 0 });
-
-            const improvements = [];
-            const campaignsData = data.reduce((acc, row) => {
-                if (!acc[row.campaignName]) acc[row.campaignName] = [];
-                acc[row.campaignName].push(row);
-                return acc;
-            }, {});
-
-            for (const campaignName in campaignsData) {
-                const days = campaignsData[campaignName].sort((a, b) => new Date(b.date) - new Date(a.date));
-                if (days.length >= 2) {
-                    const latest = days[0];
-                    const previous = days[1];
-                    improvements.push({
-                        name: campaignName,
-                        ctrChange: latest.ctr - previous.ctr,
-                        roasChange: latest.roas - previous.roas,
-                        fromCtr: previous.ctr,
-                        toCtr: latest.ctr,
-                        fromRoas: previous.roas,
-                        toRoas: latest.roas,
-                    });
-                }
-            }
-
-            let biggestCtrGain = { name: 'N/A', change: 0, from: 0, to: 0 };
-            let biggestRoasGain = { name: 'N/A', change: 0, from: 0, to: 0 };
-
-            improvements.forEach(imp => {
-                if (imp.ctrChange > biggestCtrGain.change) {
-                    biggestCtrGain = { name: imp.name, change: imp.ctrChange, from: imp.fromCtr, to: imp.toCtr };
-                }
-                if (imp.roasChange > biggestRoasGain.change) {
-                    biggestRoasGain = { name: imp.name, change: imp.roasChange, from: imp.fromRoas, to: imp.toRoas };
-                }
-            });
-
-            if (biggestCtrGain.name !== 'N/A' && biggestCtrGain.change > 0) {
-                 document.getElementById('biggest-ctr-gain').textContent = `${biggestCtrGain.name} (+${biggestCtrGain.change.toFixed(2)}%)`;
-            } else {
-                 document.getElementById('biggest-ctr-gain').textContent = 'No significant gains';
-            }
-
-            if (biggestRoasGain.name !== 'N/A' && biggestRoasGain.change > 0) {
-                 document.getElementById('biggest-roas-gain').textContent = `${biggestRoasGain.name} (+${formatROAS(biggestRoasGain.change)})`;
-            } else {
-                 document.getElementById('biggest-roas-gain').textContent = 'No significant gains';
-            }
-
 
             document.getElementById('total-spend').textContent = formatCurrency(totals.spend);
             document.getElementById('total-revenue').textContent = formatCurrency(totals.revenue);
@@ -318,12 +110,32 @@
             }
             document.getElementById('top-campaign').textContent = `${topCampaign.name} (${formatROAS(topCampaign.roas)})`;
 
+            const improvements = [];
+            const campaignsData = data.reduce((acc, row) => {
+                if (!acc[row.campaignName]) acc[row.campaignName] = [];
+                acc[row.campaignName].push(row); return acc;
+            }, {});
+            for (const campaignName in campaignsData) {
+                const days = campaignsData[campaignName].sort((a, b) => new Date(b.date) - new Date(a.date));
+                if (days.length >= 2) {
+                    const latest = days[0]; const previous = days[1];
+                    improvements.push({ name: campaignName, ctrChange: latest.ctr - previous.ctr, roasChange: latest.roas - previous.roas });
+                }
+            }
+            let biggestCtrGain = { name: 'N/A', change: 0 };
+            let biggestRoasGain = { name: 'N/A', change: 0 };
+            improvements.forEach(imp => {
+                if (imp.ctrChange > biggestCtrGain.change) biggestCtrGain = { name: imp.name, change: imp.ctrChange };
+                if (imp.roasChange > biggestRoasGain.change) biggestRoasGain = { name: imp.name, change: imp.roasChange };
+            });
+            document.getElementById('biggest-ctr-gain').textContent = biggestCtrGain.name !== 'N/A' && biggestCtrGain.change > 0 ? `${biggestCtrGain.name} (+${biggestCtrGain.change.toFixed(2)}%)` : 'No significant gains';
+            document.getElementById('biggest-roas-gain').textContent = biggestRoasGain.name !== 'N/A' && biggestRoasGain.change > 0 ? `${biggestRoasGain.name} (+${formatROAS(biggestRoasGain.change)})` : 'No significant gains';
+            
             const dropoffSearch = 100 - ((totals.searches / totals.lpv) * 100 || 0);
             const dropoffAtc = 100 - ((totals.atc / totals.searches) * 100 || 0);
             const dropoffIc = 100 - ((totals.ic / totals.atc) * 100 || 0);
             const dropoffPia = 100 - ((totals.pia / totals.ic) * 100 || 0);
             const dropoffPurchase = 100 - ((totals.purchases / totals.pia) * 100 || 0);
-
             document.getElementById('dropoff-search').textContent = `${dropoffSearch.toFixed(1)}% drop-off (${formatNumber(totals.lpv - totals.searches)} lost)`;
             document.getElementById('dropoff-atc').textContent = `${dropoffAtc.toFixed(1)}% drop-off (${formatNumber(totals.searches - totals.atc)} lost)`;
             document.getElementById('dropoff-ic').textContent = `${dropoffIc.toFixed(1)}% drop-off (${formatNumber(totals.atc - totals.ic)} lost)`;
@@ -335,8 +147,7 @@
             document.getElementById('biggest-dropoff').textContent = biggestDropoffStage;
             analysisSection.classList.remove('hidden');
         };
-
-        // --- Copy function (unchanged) ---
+        
         copyButton.addEventListener('click', () => {
             let aiText = "Here is the Facebook Ads performance data for the week:\n\n";
             rawDataForCopy.forEach(row => {
@@ -355,7 +166,6 @@
                 aiText += `  - Purchases: ${row.purchases}\n`;
                 aiText += "---\n\n";
             });
-
             copyTextarea.value = aiText;
             copyTextarea.select();
             document.execCommand('copy');
@@ -365,8 +175,7 @@
             }, 2000);
         });
 
-        // --- Fetch function (unchanged) ---
-         const fetchInsights = async () => {
+        const fetchInsights = async () => {
             try {
                 const response = await fetch('/api/insights');
                 if (!response.ok) throw new Error('API Error');
@@ -374,10 +183,8 @@
                 rawDataForCopy = data;
 
                 if (data.length > 0) {
-                    // Populate both tables
                     deliveryTableBody.innerHTML = data.map(renderDeliveryRow).join('');
                     funnelTableBody.innerHTML = data.map(renderFunnelRow).join('');
-                    
                     runAnalysis(data); 
                     loadingState.style.display = 'none';
                 } else {
@@ -388,7 +195,6 @@
                 loadingState.innerHTML = '<p class="text-red-500">Error: Could not load data from the server.</p>';
             }
         };
-
         window.addEventListener('load', fetchInsights);
     </script>
 </body>
