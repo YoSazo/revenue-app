@@ -135,6 +135,7 @@ const copyButton = document.getElementById('copy-button');
             </tr>
         `;
 
+
         const runAnalysis = (data) => {
             const totals = data.reduce((acc, row) => {
                 acc.spend += row.spend;
@@ -177,17 +178,23 @@ const copyButton = document.getElementById('copy-button');
             // Funnel Drop-off Analysis with raw numbers
             const dropoffSearch = 100 - ((totals.searches / totals.lpv) * 100 || 0);
             const dropoffAtc = 100 - ((totals.atc / totals.searches) * 100 || 0);
-            const dropoffPurchase = 100 - ((totals.purchases / totals.atc) * 100 || 0);
+            const dropoffIc = 100 - ((totals.ic / totals.atc) * 100 || 0);
+            const dropoffPia = 100 - ((totals.pia / totals.ic) * 100 || 0);
+            const dropoffPurchase = 100 - ((totals.purchases / totals.pia) * 100 || 0);
+
             document.getElementById('dropoff-search').textContent = `${dropoffSearch.toFixed(1)}% drop-off (${formatNumber(totals.lpv - totals.searches)} users lost)`;
             document.getElementById('dropoff-atc').textContent = `${dropoffAtc.toFixed(1)}% drop-off (${formatNumber(totals.searches - totals.atc)} users lost)`;
             document.getElementById('dropoff-purchase').textContent = `${dropoffPurchase.toFixed(1)}% drop-off (${formatNumber(totals.atc - totals.purchases)} users lost)`;
             
             const dropoffs = {
-                'Landing Page → Search': dropoffSearch,
-                'Search → Add to Cart': dropoffAtc,
-                'Add to Cart → Purchase': dropoffPurchase
+                'LPV → Searches': dropoffSearch,
+                'Searches → ATC': dropoffAtc,
+                'ATC → Checkouts': dropoffIc,
+                'Checkouts → Payment Info': dropoffPia,
+                'Payment Info → Purchase': dropoffPurchase,
             };
             const biggestDropoffStage = Object.keys(dropoffs).reduce((a, b) => dropoffs[a] > dropoffs[b] ? a : b);
+
             document.getElementById('biggest-dropoff').textContent = biggestDropoffStage;
 
             analysisSection.classList.remove('hidden');
