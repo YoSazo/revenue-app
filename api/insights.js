@@ -33,14 +33,8 @@ module.exports = async (request, response) => {
         const account = new AdAccount(adAccountId);
         
         const fields = [
-            'campaign_id',
-            'spend',
-            'impressions',
-            'clicks',
-            'ctr',
-            'cpc', // Cost Per Click
-            'purchase_roas', // Return On Ad Spend
-            'actions'
+            'campaign_id', 'spend', 'impressions', 'clicks', 'ctr', 'cpc',
+            'purchase_roas', 'cpm', 'reach', 'frequency', 'actions'
         ];
         
         const params = {

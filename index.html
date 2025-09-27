@@ -3,24 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Dive Ads Dashboard</title>
+    <title>Ultimate Ads Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        th { @apply px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider; }
-        td { @apply px-6 py-4 whitespace-nowrap text-sm text-gray-800; }
+        th { @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider; }
+        td { @apply px-4 py-3 whitespace-nowrap text-sm text-gray-800; }
         .card { @apply bg-white rounded-xl shadow-lg overflow-hidden; }
-        .stat-card { @apply bg-gray-50 p-6 rounded-lg; }
+        .stat-card { @apply bg-gray-50 p-6 rounded-lg shadow-sm; }
+        .stat-title { @apply text-sm font-medium text-gray-500; }
+        .stat-value { @apply mt-1 text-3xl font-semibold text-gray-900; }
     </style>
 </head>
 <body class="bg-gray-100">
 
     <div class="container mx-auto p-8 space-y-10">
         <header>
-            <h1 class="text-4xl font-bold text-gray-900">Facebook Funnel Performance Dashboard</h1>
-            <p class="mt-2 text-lg text-gray-600">In-depth analysis of campaign performance and user drop-off points for the week.</p>
+            <h1 class="text-4xl font-bold text-gray-900">Facebook Performance Dashboard</h1>
+            <p class="mt-2 text-lg text-gray-600">Extensive analysis of campaign performance and user funnels for the week.</p>
         </header>
+
+        <!-- NEW: Weekly Summary Section -->
+        <div id="summary-section" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Weekly Summary</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card">
+                    <p class="stat-title">Total Spend</p>
+                    <p id="total-spend" class="stat-value"></p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-title">Total Revenue</p>
+                    <p id="total-revenue" class="stat-value"></p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-title">Total Purchases</p>
+                    <p id="total-purchases" class="stat-value"></p>
+                </div>
+                <div class="stat-card bg-green-50">
+                    <p class="stat-title">Overall ROAS</p>
+                    <p id="overall-roas" class="stat-value text-green-700"></p>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Data Table -->
         <div class="card">
@@ -29,39 +54,25 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th>Date</th>
-                            <th>Campaign</th>
-                            <th>Spend</th>
-                            <th>ROAS</th>
-                            <th>Impressions</th>
-                            <th>CPC</th>
+                            <th>Date</th><th>Campaign</th>
+                            <!-- Financials -->
+                            <th>Spend</th><th>ROAS</th><th>Cost per Purchase</th><th>CPC</th><th>CPM</th>
+                            <!-- Delivery -->
+                            <th>Impressions</th><th>Reach</th><th>Frequency</th>
                             <!-- Funnel Counts -->
-                            <th class="text-blue-600">LP Views</th>
-                            <th class="text-blue-600">Searches</th>
-                            <th class="text-blue-600">Adds to Cart</th>
-                            <th class="text-blue-600">Checkouts</th>
-                            <th class="text-blue-600">Purchases</th>
-                            <!-- Funnel Rates -->
-                            <th class="text-green-600">Search Rate</th>
-                            <th class="text-green-600">ATC Rate</th>
-                            <th class="text-green-600">Purchase Rate</th>
+                            <th class="text-blue-600">LP Views</th><th class="text-blue-600">Searches</th><th class="text-blue-600">Adds to Cart</th><th class="text-blue-600">Purchases</th>
                         </tr>
                     </thead>
-                    <tbody id="insights-table-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Data will be injected here -->
-                    </tbody>
+                    <tbody id="insights-table-body" class="bg-white divide-y divide-gray-200"></tbody>
                 </table>
             </div>
-            <div id="loading-state" class="p-8 text-center text-gray-500">
-                <p>Loading deep performance data...</p>
-            </div>
+            <div id="loading-state" class="p-8 text-center text-gray-500"><p>Loading extensive performance data...</p></div>
         </div>
 
-        <!-- NEW: Comparison & Analysis Section -->
+        <!-- Enhanced Analysis Section -->
         <div id="analysis-section" class="hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Performance Analysis</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Performance Highlights -->
                 <div class="stat-card col-span-1">
                     <h3 class="font-bold text-lg mb-4">Top Performers</h3>
                     <div class="space-y-3 text-sm">
@@ -69,9 +80,9 @@
                         <p><strong>Top Campaign (by ROAS):</strong> <span id="top-campaign" class="font-semibold text-green-600"></span></p>
                     </div>
                 </div>
-                <!-- Funnel Drop-off Analysis -->
                 <div class="stat-card col-span-2">
-                    <h3 class="font-bold text-lg mb-4">Funnel Drop-off Analysis ( największy spadek )</h3>
+                    <!-- Corrected the Polish text -->
+                    <h3 class="font-bold text-lg mb-4">Funnel Drop-off Analysis (Biggest Drop)</h3>
                     <div class="space-y-3 text-sm">
                         <p><strong>Landing Page → Searches:</strong> <span id="dropoff-search" class="font-semibold text-red-600"></span></p>
                         <p><strong>Searches → Adds to Cart:</strong> <span id="dropoff-atc" class="font-semibold text-red-600"></span></p>
@@ -84,8 +95,10 @@
     </div>
 
     <script>
+        // --- DOM Elements ---
         const tableBody = document.getElementById('insights-table-body');
         const loadingState = document.getElementById('loading-state');
+        const summarySection = document.getElementById('summary-section');
         const analysisSection = document.getElementById('analysis-section');
 
         // --- Formatters ---
@@ -94,75 +107,77 @@
         const formatPercent = (num) => `${num.toFixed(2)}%`;
         const formatROAS = (num) => `${num.toFixed(2)}x`;
 
-        // --- Render function for the main table ---
+        // --- RENDER FUNCTIONS ---
         const renderTableRow = (data) => `
             <tr>
                 <td class="font-medium">${new Date(data.date).toLocaleDateString()}</td>
                 <td class="font-bold">${data.campaignName}</td>
                 <td>${formatCurrency(data.spend)}</td>
                 <td class="font-semibold text-green-700">${formatROAS(data.roas)}</td>
-                <td>${formatNumber(data.impressions)}</td>
+                <td class="font-semibold text-red-700">${formatCurrency(data.costPerPurchase)}</td>
                 <td>${formatCurrency(data.cpc)}</td>
+                <td>${formatCurrency(data.cpm)}</td>
+                <td>${formatNumber(data.impressions)}</td>
+                <td>${formatNumber(data.reach)}</td>
+                <td>${data.frequency.toFixed(2)}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.lpv)}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.searches)}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.atc)}</td>
-                <td class="font-medium text-blue-700">${formatNumber(data.ic)}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.purchases)}</td>
-                <td class="font-semibold text-green-700">${formatPercent(data.lpvToSearchRate)}</td>
-                <td class="font-semibold text-green-700">${formatPercent(data.searchToAtcRate)}</td>
-                <td class="font-semibold text-green-700">${formatPercent(data.icToPurchaseRate)}</td>
             </tr>
         `;
 
-        // --- NEW: Analysis function ---
         const runAnalysis = (data) => {
-            // Aggregate totals
             const totals = data.reduce((acc, row) => {
                 acc.spend += row.spend;
+                acc.revenue += row.spend * row.roas;
                 acc.lpv += row.lpv;
                 acc.searches += row.searches;
                 acc.atc += row.atc;
-                acc.ic += row.ic;
                 acc.purchases += row.purchases;
                 return acc;
-            }, { spend: 0, lpv: 0, searches: 0, atc: 0, ic: 0, purchases: 0 });
-            
+            }, { spend: 0, revenue: 0, lpv: 0, searches: 0, atc: 0, purchases: 0 });
+
+            // Populate Weekly Summary
+            document.getElementById('total-spend').textContent = formatCurrency(totals.spend);
+            document.getElementById('total-revenue').textContent = formatCurrency(totals.revenue);
+            document.getElementById('total-purchases').textContent = formatNumber(totals.purchases);
+            const overallROAS = totals.spend > 0 ? totals.revenue / totals.spend : 0;
+            document.getElementById('overall-roas').textContent = formatROAS(overallROAS);
+            summarySection.classList.remove('hidden');
+
             // Top Performers Analysis
             const bestDay = data.reduce((max, day) => day.roas > max.roas ? day : max, data[0]);
             document.getElementById('best-day').textContent = `${new Date(bestDay.date).toLocaleDateString()} (${formatROAS(bestDay.roas)})`;
-
+            
             const campaignTotals = data.reduce((acc, row) => {
-                if (!acc[row.campaignName]) {
-                    acc[row.campaignName] = { spend: 0, purchases: 0 };
-                }
-                acc[row.campaignName].spend += row.spend;
-                acc[row.campaignName].purchases += row.purchases;
+                const name = row.campaignName;
+                if (!acc[name]) acc[name] = { spend: 0, revenue: 0 };
+                acc[name].spend += row.spend;
+                acc[name].revenue += row.spend * row.roas;
                 return acc;
             }, {});
-            let topCampaign = { name: 'N/A', roas: 0 };
+
+            let topCampaign = { name: 'N/A', roas: -1 };
             for (const name in campaignTotals) {
                 const campaign = campaignTotals[name];
-                const revenue = campaign.purchases * (totals.spend > 0 ? ( (totals.lpv * (totals.searches/totals.lpv) * (totals.atc/totals.searches) * (totals.ic/totals.atc) * (totals.purchases/totals.ic) ) / campaign.purchases) : 0);
-                const roas = campaign.spend > 0 ? revenue / campaign.spend : 0;
-                if (roas > topCampaign.roas) {
-                    topCampaign = { name, roas };
-                }
+                const roas = campaign.spend > 0 ? campaign.revenue / campaign.spend : 0;
+                if (roas > topCampaign.roas) topCampaign = { name, roas };
             }
             document.getElementById('top-campaign').textContent = `${topCampaign.name} (${formatROAS(topCampaign.roas)})`;
 
-
-            // Funnel Drop-off Analysis
+            // Funnel Drop-off Analysis with raw numbers
             const dropoffSearch = 100 - ((totals.searches / totals.lpv) * 100 || 0);
             const dropoffAtc = 100 - ((totals.atc / totals.searches) * 100 || 0);
             const dropoffPurchase = 100 - ((totals.purchases / totals.atc) * 100 || 0);
-            document.getElementById('dropoff-search').textContent = `${dropoffSearch.toFixed(2)}% of users dropped off`;
-            document.getElementById('dropoff-atc').textContent = `${dropoffAtc.toFixed(2)}% of users dropped off`;
-            document.getElementById('dropoff-purchase').textContent = `${dropoffPurchase.toFixed(2)}% of users dropped off`;
+            document.getElementById('dropoff-search').textContent = `${dropoffSearch.toFixed(1)}% drop-off (${formatNumber(totals.lpv - totals.searches)} users lost)`;
+            document.getElementById('dropoff-atc').textContent = `${dropoffAtc.toFixed(1)}% drop-off (${formatNumber(totals.searches - totals.atc)} users lost)`;
+            document.getElementById('dropoff-purchase').textContent = `${dropoffPurchase.toFixed(1)}% drop-off (${formatNumber(totals.atc - totals.purchases)} users lost)`;
             
             const dropoffs = {
-                'From Landing Page to Search': dropoffSearch,
-                'From Search to Add to Cart': dropoffAtc,
-                'From Add to Cart to Purchase': dropoffPurchase
+                'Landing Page → Search': dropoffSearch,
+                'Search → Add to Cart': dropoffAtc,
+                'Add to Cart → Purchase': dropoffPurchase
             };
             const biggestDropoffStage = Object.keys(dropoffs).reduce((a, b) => dropoffs[a] > dropoffs[b] ? a : b);
             document.getElementById('biggest-dropoff').textContent = biggestDropoffStage;
@@ -170,7 +185,6 @@
             analysisSection.classList.remove('hidden');
         };
 
-        // --- Main data fetching function ---
         const fetchInsights = async () => {
             try {
                 const response = await fetch('/api/insights');
@@ -179,7 +193,7 @@
 
                 if (data.length > 0) {
                     tableBody.innerHTML = data.map(renderTableRow).join('');
-                    runAnalysis(data); // Run the analysis on the fetched data
+                    runAnalysis(data);
                     loadingState.style.display = 'none';
                 } else {
                     loadingState.innerHTML = '<p>No performance data found for the selected campaigns this week.</p>';
