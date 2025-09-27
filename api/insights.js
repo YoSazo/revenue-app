@@ -1,4 +1,4 @@
-const bizSdk = require('facebook-nodejs-business-sdk'); // Use require
+const bizSdk = require('facebook-nodejs-business-sdk');
 
 const accessToken = process.env.FB_ACCESS_TOKEN;
 const adAccountId = process.env.FB_AD_ACCOUNT_ID;
@@ -24,7 +24,6 @@ const calculateRate = (numerator, denominator) => {
     return (numerator / denominator) * 100;
 };
 
-// --- THIS IS THE CORRECT VERCEL SYNTAX ---
 module.exports = async (request, response) => {
     if (!accessToken || !adAccountId) {
         return response.status(500).json({ error: 'Facebook API credentials are not configured.' });
@@ -33,7 +32,17 @@ module.exports = async (request, response) => {
     try {
         const account = new AdAccount(adAccountId);
         
-        const fields = ['campaign_id', 'spend', 'impressions', 'clicks', 'ctr', 'reach', 'frequency', 'actions'];
+        const fields = [
+            'campaign_id',
+            'spend',
+            'impressions',
+            'clicks',
+            'ctr',
+            'cpc', // Cost Per Click
+            'purchase_roas', // Return On Ad Spend
+            'actions'
+        ];
+        
         const params = {
             level: 'campaign',
             time_increment: 1,
@@ -58,9 +67,13 @@ module.exports = async (request, response) => {
                 impressions: parseInt(insight.impressions, 10),
                 clicks: parseInt(insight.clicks, 10),
                 ctr: parseFloat(insight.ctr),
-                reach: parseInt(insight.reach, 10),
-                frequency: parseFloat(insight.frequency),
-                lpv, searches, atc, ic, purchases,
+                cpc: parseFloat(insight.cpc || 0),
+                roas: insight.purchase_roas && insight.purchase_roas.length > 0 ? parseFloat(insight.purchase_roas[0].value) : 0,
+                lpv,
+                searches,
+                atc,
+                ic,
+                purchases,
                 lpvToSearchRate: calculateRate(searches, lpv),
                 searchToAtcRate: calculateRate(atc, searches),
                 atcToIcRate: calculateRate(ic, atc),
