@@ -66,18 +66,29 @@
 
         <div id="analysis-section" class="hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Performance Analysis</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="stat-card col-span-1">
+            <!-- Changed to lg:grid-cols-3 to accommodate the new card -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Top Performers Card -->
+                <div class="stat-card">
                     <h3 class="font-bold text-lg mb-4">Top Performers</h3>
                     <div class="space-y-3 text-sm">
                         <p><strong>Best Day (by ROAS):</strong> <span id="best-day" class="font-semibold text-green-600"></span></p>
                         <p><strong>Top Campaign (by ROAS):</strong> <span id="top-campaign" class="font-semibold text-green-600"></span></p>
                     </div>
                 </div>
-                <div class="stat-card col-span-2">
-                    <h3 class="font-bold text-lg mb-4">Funnel Drop-off Analysis (Biggest Drop)</h3>
-                    <!-- THIS IS THE FIX: Added all the new funnel stages -->
+
+                 <div class="stat-card bg-green-50">
+                    <h3 class="font-bold text-lg mb-4 text-green-800">Biggest Improvements (Day-over-Day)</h3>
                     <div class="space-y-3 text-sm">
+                        <p><strong>Biggest CTR Gain:</strong> <span id="biggest-ctr-gain" class="font-semibold text-green-600"></span></p>
+                        <p><strong>Biggest ROAS Gain:</strong> <span id="biggest-roas-gain" class="font-semibold text-green-600"></span></p>
+                    </div>
+                </div>
+
+                                <div class="stat-card bg-red-50">
+                    <h3 class="font-bold text-lg mb-4 text-red-800">Funnel Drop-off Analysis (Biggest Drop)</h3>
+                    <div class="space-y-3 text-sm">
+                        <!-- Corrected and expanded the funnel stages -->
                         <p><strong>Landing Page → Searches:</strong> <span id="dropoff-search" class="font-semibold text-red-600"></span></p>
                         <p><strong>Searches → Adds to Cart:</strong> <span id="dropoff-atc" class="font-semibold text-red-600"></span></p>
                         <p><strong>Adds to Cart → Checkouts:</strong> <span id="dropoff-ic" class="font-semibold text-red-600"></span></p>
@@ -85,6 +96,7 @@
                         <p><strong>Payment Info → Purchases:</strong> <span id="dropoff-purchase" class="font-semibold text-red-600"></span></p>
                         <p class="pt-2"><strong>Biggest Drop-off Point:</strong> <span id="biggest-dropoff" class="font-bold text-red-700 bg-red-100 px-2 py-1 rounded"></span></p>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -134,6 +146,55 @@
                 acc.searches += row.searches; acc.atc += row.atc; acc.ic += row.ic;
                 acc.pia += row.pia; acc.purchases += row.purchases; return acc;
             }, { spend: 0, revenue: 0, lpv: 0, searches: 0, atc: 0, ic: 0, pia: 0, purchases: 0 });
+
+            const improvements = [];
+            const campaignsData = data.reduce((acc, row) => {
+                if (!acc[row.campaignName]) acc[row.campaignName] = [];
+                acc[row.campaignName].push(row);
+                return acc;
+            }, {});
+
+            for (const campaignName in campaignsData) {
+                const days = campaignsData[campaignName].sort((a, b) => new Date(b.date) - new Date(a.date));
+                if (days.length >= 2) {
+                    const latest = days[0];
+                    const previous = days[1];
+                    improvements.push({
+                        name: campaignName,
+                        ctrChange: latest.ctr - previous.ctr,
+                        roasChange: latest.roas - previous.roas,
+                        fromCtr: previous.ctr,
+                        toCtr: latest.ctr,
+                        fromRoas: previous.roas,
+                        toRoas: latest.roas,
+                    });
+                }
+            }
+
+            let biggestCtrGain = { name: 'N/A', change: 0, from: 0, to: 0 };
+            let biggestRoasGain = { name: 'N/A', change: 0, from: 0, to: 0 };
+
+            improvements.forEach(imp => {
+                if (imp.ctrChange > biggestCtrGain.change) {
+                    biggestCtrGain = { name: imp.name, change: imp.ctrChange, from: imp.fromCtr, to: imp.toCtr };
+                }
+                if (imp.roasChange > biggestRoasGain.change) {
+                    biggestRoasGain = { name: imp.name, change: imp.roasChange, from: imp.fromRoas, to: imp.toRoas };
+                }
+            });
+
+            if (biggestCtrGain.name !== 'N/A' && biggestCtrGain.change > 0) {
+                 document.getElementById('biggest-ctr-gain').textContent = `${biggestCtrGain.name} (+${biggestCtrGain.change.toFixed(2)}%)`;
+            } else {
+                 document.getElementById('biggest-ctr-gain').textContent = 'No significant gains';
+            }
+
+            if (biggestRoasGain.name !== 'N/A' && biggestRoasGain.change > 0) {
+                 document.getElementById('biggest-roas-gain').textContent = `${biggestRoasGain.name} (+${formatROAS(biggestRoasGain.change)})`;
+            } else {
+                 document.getElementById('biggest-roas-gain').textContent = 'No significant gains';
+            }
+
 
             document.getElementById('total-spend').textContent = formatCurrency(totals.spend);
             document.getElementById('total-revenue').textContent = formatCurrency(totals.revenue);
