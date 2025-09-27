@@ -38,6 +38,7 @@ module.exports = async (request, response) => {
 
     try {
         const token = await getAccessToken();
+        console.log('Attempting to fetch Hotjar recordings from:', requestUrl);
         const recordingsResponse = await axios.get(`https://api.hotjar.io/v1/sites/${siteId}/recordings?limit=10`, {
             headers: { Authorization: `Bearer ${token}` },
         });
