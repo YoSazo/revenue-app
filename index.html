@@ -215,7 +215,7 @@
                 refreshButton.disabled = false;
             }
         };
-
+        refreshButton.addEventListener('click', fetchInsights);
         window.addEventListener('load', fetchInsights);
     </script>
 </body>
