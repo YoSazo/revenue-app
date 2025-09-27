@@ -3,267 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ad Revenue Dashboard</title>
-    <link rel="manifest" href="/manifest.json">
+    <title>Ad Performance Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            font-weight: 700; /* BOLD */
-        }
-        .active-tab {
-            background-color: #34D399; /* Emerald 400 */
-            color: white;
-        }
-        .inactive-tab {
-            background-color: white;
-            color: #374151; /* Gray 700 */
-        }
-        /* --- NEW: Added styles to make the card feel like a button --- */
-        .hotel-card {
-            transition: transform 0.1s ease-in-out, background-color 0.2s;
-        }
-        .hotel-card:hover {
-            background-color: #f9fafb; /* Gray-50 */
-        }
-        .hotel-card:active {
-            transform: scale(0.98); /* Gives a "pressed" effect */
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .table-header { @apply sticky top-0 bg-gray-100; }
+        th, td { @apply px-4 py-3 text-left text-sm; }
+        th { @apply font-semibold text-gray-600 uppercase tracking-wider; }
+        tbody tr:nth-child(even) { @apply bg-gray-50; }
     </style>
 </head>
-<body class="bg-gray-200 flex justify-center h-screen overflow-hidden p-4 pt-16">
+<body class="bg-gray-100">
 
-    <!-- Main App Container -->
-    <div class="w-full max-w-sm bg-white rounded-3xl border-2 border-black p-4 space-y-4 min-h-[600px] flex flex-col">
+    <div class="container mx-auto p-6">
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Campaign Insights Dashboard</h1>
+            <p class="text-gray-500">Weekly performance overview for key campaigns</p>
+        </header>
 
-        <button id="enable-notifications" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        
-        <!-- Time Buttons -->
-        <div class="flex justify-center space-x-2">
-            <button id="today" class="time-btn flex-1 py-1 px-3 rounded-full text-xs active-tab border-2 border-black">Today</button>
-            <button id="yesterday" class="time-btn flex-1 py-1 px-3 rounded-full text-xs inactive-tab border-2 border-black">Yesterday</button>
-            <button id="thisWeek" class="time-btn flex-1 py-1 px-3 rounded-full text-xs inactive-tab border-2 border-black">This Week</button>
-        </div>
-
-        <!-- Revenue Card -->
-        <div class="bg-white rounded-2xl p-4 text-center border-2 border-black">
-            <h2 class="text-gray-500 text-base">Total Revenue</h2>
-            <p id="total-revenue" class="text-4xl my-1">$0.00</p>
-            <div class="inline-block bg-white border-2 border-black rounded-full px-4 py-1 mt-1">
-                <p id="commission" class="text-gray-600 text-xs">10% Commission: $0.00</p>
+        <main class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div id="table-container" class="max-h-[70vh] overflow-y-auto">
+                <table class="w-full">
+                    <thead class="table-header">
+                        <tr>
+                            <th>Date</th>
+                            <th>Campaign</th>
+                            <th>Spend</th>
+                            <th>Impressions</th>
+                            <th>CTR</th>
+                            <th>Reach</th>
+                            <th>Frequency</th>
+                            <th class="text-blue-600">LP Views</th>
+                            <th class="text-blue-600">Searches</th>
+                            <th class="text-blue-600">Adds to Cart</th>
+                            <th class="text-blue-600">Checkouts</th>
+                            <th class="text-blue-600">Purchases</th>
+                            <th class="text-green-600">Search Rate</th>
+                            <th class="text-green-600">ATC Rate</th>
+                            <th class="text-green-600">Checkout Rate</th>
+                            <th class="text-green-600">Purchase Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="insights-table-body">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                    <tfoot class="sticky bottom-0 bg-gray-200 font-bold">
+                        <!-- Totals will be injected here -->
+                    </tfoot>
+                </table>
             </div>
-        </div>
-
-        <!-- Top Earning Button -->
-        <div class="text-center">
-            <button class="bg-emerald-400 text-white py-1 px-5 rounded-full text-xs border-2 border-black">Top Earning Hotels</button>
-        </div>
-
-        <!-- Hotel List -->
-        <div id="hotels-list" class="space-y-3">
-            <!-- Hotel cards will be injected here -->
-        </div>
-    </div>
-
-    <!-- Details Modal (hidden by default) -->
-    <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white w-full max-w-sm rounded-2xl border-2 border-black p-5 relative">
-            <button id="close-modal" class="absolute top-2 right-3 text-2xl font-bold">&times;</button>
-            <h3 id="modal-title" class="text-lg mb-3">Home Place Suites</h3>
-            <div id="modal-content" class="text-sm space-y-1">
-                <!-- Detailed stats will be injected here -->
+            <div id="loading-state" class="p-6 text-center text-gray-500">
+                <p>Loading campaign data...</p>
             </div>
-        </div>
-    </div>
-    <div id="message-box" class="hidden fixed top-5 right-5 bg-white border-2 border-black rounded-lg shadow-lg p-4 max-w-sm z-50">
-        <p id="message-text"></p>
+        </main>
     </div>
 
     <script>
-        const messageBox = document.getElementById('message-box');
-        const messageText = document.getElementById('message-text');
-        const notificationButton = document.getElementById('enable-notifications');
-        const VAPID_PUBLIC_KEY = 'BGej8l1ZGg6FH4CS_fcesa5kxCxgO9dXRgRx5omMVtVKnkQqEHOlxLB5Hw2NsQX0ymV9hxttPog1yq3_4Crv4tI';
-        const totalRevenueEl = document.getElementById('total-revenue');
-        const commissionEl = document.getElementById('commission');
-        const hotelsListEl = document.getElementById('hotels-list');
-        const timeButtons = document.querySelectorAll('.time-btn');
-        const modal = document.getElementById('details-modal');
-        const closeModalBtn = document.getElementById('close-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalContent = document.getElementById('modal-content');
+        const tableBody = document.getElementById('insights-table-body');
+        const tableFooter = document.getElementById('table-footer');
+        const loadingState = document.getElementById('loading-state');
         
-        let currentData = { hotels: [] };
-
         // --- FORMATTERS ---
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
         const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
-        const formatCTR = (num) => `${num.toFixed(2)}%`;
+        const formatPercent = (num) => `${num.toFixed(2)}%`;
 
-        // --- MODAL LOGIC ---
-        const openDetailsModal = (hotelIndex) => {
-            const hotel = currentData.hotels[hotelIndex];
-            if (!hotel) return;
+        const renderTableRow = (data) => `
+            <tr>
+                <td class="font-medium text-gray-800">${new Date(data.date).toLocaleDateString()}</td>
+                <td class="text-gray-700">${data.campaignName.replace(/\|/g, ' | ')}</td>
+                <td>${formatCurrency(data.spend)}</td>
+                <td>${formatNumber(data.impressions)}</td>
+                <td>${formatPercent(data.ctr)}</td>
+                <td>${formatNumber(data.reach)}</td>
+                <td>${data.frequency.toFixed(2)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(data.lpv)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(data.searches)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(data.atc)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(data.ic)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(data.purchases)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(data.lpvToSearchRate)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(data.searchToAtcRate)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(data.atcToIcRate)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(data.icToPurchaseRate)}</td>
+            </tr>
+        `;
 
-            modalTitle.textContent = hotel.name;
-            const details = hotel.details;
-            modalContent.innerHTML = `
-                <p>LPV: ${formatNumber(details.lpv)}</p>
-                <p>Searches: ${formatNumber(details.searches)}</p>
-                <p>ATC: ${formatNumber(details.atc)}</p>
-                <p>Initiate Checkouts: ${formatNumber(details.initiateCheckouts)}</p>
-                <p>Payment Info Adds: ${formatNumber(details.paymentInfoAdds)}</p>
-                <p>Purchases: ${formatNumber(details.purchases)}</p>
-                <p>CTR (Link Click): ${formatCTR(details.ctr_link)}</p>
-                <p>CTR (All): ${formatCTR(details.ctr_all)}</p>
+        const renderTotalsRow = (totals) => {
+             const footerRow = document.createElement('tr');
+             footerRow.innerHTML = `
+                <td colspan="2">Totals</td>
+                <td>${formatCurrency(totals.spend)}</td>
+                <td>${formatNumber(totals.impressions)}</td>
+                <td>${formatPercent(totals.ctr)}</td>
+                <td>${formatNumber(totals.reach)}</td>
+                <td>-</td>
+                <td class="font-medium text-blue-700">${formatNumber(totals.lpv)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(totals.searches)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(totals.atc)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(totals.ic)}</td>
+                <td class="font-medium text-blue-700">${formatNumber(totals.purchases)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(totals.lpvToSearchRate)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(totals.searchToAtcRate)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(totals.atcToIcRate)}</td>
+                <td class="font-semibold text-green-700">${formatPercent(totals.icToPurchaseRate)}</td>
             `;
-            modal.classList.remove('hidden');
-        };
-
-        closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-        
-        // --- DASHBOARD LOGIC ---
-        const renderHotelCard = (hotel, index) => `
-            <div class="hotel-card bg-white rounded-2xl p-3 border-2 border-black flex items-center justify-between space-x-2 cursor-pointer" data-hotel-index="${index}">
-                <div>
-                    <p class="text-base">${hotel.name}</p>
-                    <p class="text-xs text-gray-500">${hotel.location}</p>
-                </div>
-                <div class="bg-white border-2 border-black rounded-xl p-2 text-xs text-right">
-                    <p><strong>CPA:</strong> ${formatCurrency(hotel.cpa)}</p>
-                    <p><strong>CTR:</strong> ${formatCTR(hotel.ctr)}</p>
-                    <p><strong>Reach:</strong> ${formatNumber(hotel.reach)}</p>
-                </div>
-            </div>`;
-        
-        const attachClickListeners = () => {
-            document.querySelectorAll('[data-hotel-index]').forEach(card => {
-                card.addEventListener('click', () => {
-                    openDetailsModal(card.dataset.hotelIndex);
-                });
-            });
-        };
-
-        function showMessage(message, duration = 3000) {
-            messageText.textContent = message;
-            messageBox.classList.remove('hidden');
-            setTimeout(() => {
-                messageBox.classList.add('hidden');
-            }, duration);
+            tableFooter.innerHTML = ''; // Clear previous footer
+            tableFooter.appendChild(footerRow);
         }
 
-
-        const updateDashboard = async (period) => {
+        const fetchInsights = async () => {
             try {
-                hotelsListEl.innerHTML = '<p class="text-center text-gray-500">Loading...</p>';
-                const response = await fetch(`/api/data?period=${period}`);
+                const response = await fetch('/api/insights');
                 if (!response.ok) throw new Error('Network response was not ok');
-                
                 const data = await response.json();
-                currentData = data; 
 
-                totalRevenueEl.textContent = formatCurrency(data.totalRevenue);
-                commissionEl.textContent = `10% Commission: ${formatCurrency(data.totalRevenue * 0.10)}`;
-                
-                if (data.hotels && data.hotels.length > 0) {
-                    hotelsListEl.innerHTML = data.hotels.map(renderHotelCard).join('');
-                    attachClickListeners(); // --- FIX: Attach listeners AFTER cards are rendered
+                if (data.length > 0) {
+                    tableBody.innerHTML = data.map(renderTableRow).join('');
+                    
+                    // Calculate and render totals
+                    const totals = data.reduce((acc, row) => {
+                        acc.spend += row.spend;
+                        acc.impressions += row.impressions;
+                        acc.clicks += row.clicks;
+                        acc.reach += row.reach; // Note: reach is unique, summing isn't accurate but gives an idea
+                        acc.lpv += row.lpv;
+                        acc.searches += row.searches;
+                        acc.atc += row.atc;
+                        acc.ic += row.ic;
+                        acc.purchases += row.purchases;
+                        return acc;
+                    }, { spend: 0, impressions: 0, clicks: 0, reach: 0, lpv: 0, searches: 0, atc: 0, ic: 0, purchases: 0 });
+
+                    // Calculate overall rates for totals
+                    totals.ctr = (totals.clicks / totals.impressions) * 100 || 0;
+                    totals.lpvToSearchRate = (totals.searches / totals.lpv) * 100 || 0;
+                    totals.searchToAtcRate = (totals.atc / totals.searches) * 100 || 0;
+                    totals.atcToIcRate = (totals.ic / totals.atc) * 100 || 0;
+                    totals.icToPurchaseRate = (totals.purchases / totals.ic) * 100 || 0;
+
+                    renderTotalsRow(totals);
+                    loadingState.style.display = 'none';
                 } else {
-                    hotelsListEl.innerHTML = '<p class="text-center text-gray-500">No data for this period.</p>';
+                    loadingState.innerHTML = '<p>No performance data found for the selected campaigns this week.</p>';
                 }
-
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
-                hotelsListEl.innerHTML = '<p class="text-center text-red-500">Could not load data.</p>';
+                loadingState.innerHTML = '<p class="text-red-500">Error: Could not load data from the server.</p>';
             }
-            
-            timeButtons.forEach(button => {
-                button.classList.remove('active-tab');
-                button.classList.add('inactive-tab');
-                if (button.id === period) {
-                    button.classList.add('active-tab');
-                    button.classList.remove('inactive-tab');
-                }
-            });
         };
 
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-            const rawData = window.atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-
-
-        async function enableNotifications() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                showMessage('Push Notifications are not supported on this device or browser.');
-                return;
-            }
-
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                notificationButton.classList.add('text-emerald-500');
-                const registration = await navigator.serviceWorker.ready;
-                let subscription = await registration.pushManager.getSubscription();
-                if (subscription === null) {
-                    subscription = await registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                    });
-                }
-
-                
-                await fetch('/api/subscribe', {
-                    method: 'POST',
-                    body: JSON.stringify(subscription),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                showMessage('Notifications enabled!');
-            } else {
-                showMessage('You have blocked notifications.');
-            }
-        }
-
-
-        notificationButton.addEventListener('click', enableNotifications);
-
-        
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(() => console.log('Service worker registered.'))
-                    .catch(err => console.log('Service worker registration failed: ', err));
-
-
-                    navigator.serviceWorker.ready.then(reg => {
-                    reg.pushManager.getSubscription().then(sub => {
-                        if (sub && Notification.permission === 'granted') {
-                            notificationButton.classList.add('text-emerald-500');
-            }
-                    });
-                });
-            });
-        }
-        
-        timeButtons.forEach(button => button.addEventListener('click', () => updateDashboard(button.id)));
-        
-        window.addEventListener('load', () => updateDashboard('today'));
+        window.addEventListener('load', fetchInsights);
     </script>
-
 </body>
 </html>
