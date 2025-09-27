@@ -1,7 +1,14 @@
 [build]
   functions = "functions"
 
+# Route for Facebook data
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/insights/:splat"
+  from = "/api/insights"
+  to = "/.netlify/functions/insights"
+  status = 200
+
+# NEW route for Hotjar data
+[[redirects]]
+  from = "/api/hotjar"
+  to = "/.netlify/functions/hotjar"
   status = 200
