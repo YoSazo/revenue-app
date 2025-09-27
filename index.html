@@ -187,14 +187,14 @@
             try {
                 const response = await fetch('/api/insights');
                 if (!response.ok) throw new Error('API Error');
-                const data = await response.json();
-                rawDataForCopy = data;
+                rawData = await response.json();
 
-                if (data.length > 0) {
+                if (rawData.length > 0) {
                     deliveryTableBody.innerHTML = data.map(renderDeliveryRow).join('');
                     funnelTableBody.innerHTML = data.map(renderFunnelRow).join('');
                     runAnalysis(data); 
                     loadingState.style.display = 'none';
+                    
                 } else {
                     loadingState.innerHTML = '<p>No performance data found for the selected campaigns this week.</p>';
                 }
