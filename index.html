@@ -366,7 +366,7 @@
         });
 
         // --- Fetch function (unchanged) ---
-        const fetchInsights = async () => {
+         const fetchInsights = async () => {
             try {
                 const response = await fetch('/api/insights');
                 if (!response.ok) throw new Error('API Error');
@@ -388,9 +388,6 @@
                 loadingState.innerHTML = '<p class="text-red-500">Error: Could not load data from the server.</p>';
             }
         };
-
-        window.addEventListener('load', fetchInsights);
-
 
         window.addEventListener('load', fetchInsights);
     </script>
