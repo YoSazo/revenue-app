@@ -42,23 +42,42 @@
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Daily Campaign Breakdown</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <!-- THIS IS THE FIX: Added all the columns back -->
-                        <tr>
-                            <th>Date</th><th>Campaign</th><th>Spend</th><th>ROAS</th><th>Cost per Purchase</th><th>CPC</th><th>CPM</th>
-                            <th>Impressions</th><th>Reach</th><th>Frequency</th><th>CTR</th>
-                            <th class="text-blue-600">LP Views</th><th class="text-blue-600">Searches</th><th class="text-blue-600">Adds to Cart</th>
-                            <th class="text-blue-600">Checkouts</th><th class="text-blue-600">Payment Info</th><th class="text-blue-600">Purchases</th>
-                        </tr>
-                    </thead>
-                    <tbody id="insights-table-body" class="bg-white divide-y divide-gray-200"></tbody>
-                </table>
+        <!-- NEW: TWO SEPARATE CARDS FOR DATA -->
+        <div id="data-display-section" class="space-y-10">
+            <!-- Card 1: Daily Campaign Breakdown -->
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Daily Campaign Breakdown</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th>Date</th><th>Campaign</th><th>Spend</th><th>ROAS</th><th>Cost per Purchase</th>
+                                <th>CPC</th><th>CPM</th><th>Impressions</th><th>Reach</th><th>Frequency</th><th>CTR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="delivery-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
             </div>
-            <div id="loading-state" class="p-8 text-center text-gray-500"><p>Loading extensive performance data...</p></div>
+
+            <!-- Card 2: Daily Funnel Performance -->
+            <div class="card">
+                <h2 class="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">Daily Funnel Performance</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th>Date</th><th>Campaign</th>
+                                <th class="text-blue-600">LP Views</th><th class="text-blue-600">Searches</th>
+                                <th class="text-blue-600">Adds to Cart</th><th class="text-blue-600">Checkouts</th>
+                                <th class="text-blue-600">Payment Info</th><th class="text-blue-600">Purchases</th>
+                            </tr>
+                        </thead>
+                        <tbody id="funnel-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+             <div id="loading-state" class="p-8 text-center text-gray-500"><p>Loading extensive performance data...</p></div>
         </div>
 
         <div id="analysis-section" class="hidden">
@@ -102,8 +121,9 @@
     <textarea id="copy-data-textarea" class="absolute -left-full"></textarea>
 
     <script>
-        // --- DOM Elements ---
-        const tableBody = document.getElementById('insights-table-body');
+        // --- DOM Elements (UPDATED) ---
+        const deliveryTableBody = document.getElementById('delivery-table-body');
+        const funnelTableBody = document.getElementById('funnel-table-body');
         const loadingState = document.getElementById('loading-state');
         const summarySection = document.getElementById('summary-section');
         const analysisSection = document.getElementById('analysis-section');
@@ -118,7 +138,7 @@
         const formatROAS = (num) => `${num.toFixed(2)}x`;
 
         // --- Render function ---
-        const renderTableRow = (data) => `
+        const renderDeliveryRow = (data) => `
             <tr>
                 <td class="font-medium">${new Date(data.date).toLocaleDateString()}</td>
                 <td class="font-bold">${data.campaignName}</td>
@@ -131,6 +151,13 @@
                 <td>${formatNumber(data.reach)}</td>
                 <td>${data.frequency.toFixed(2)}</td>
                 <td class="font-semibold text-indigo-600">${formatPercent(data.ctr)}</td>
+            </tr>
+        `;
+
+        const renderFunnelRow = (data) => `
+             <tr>
+                <td class="font-medium">${new Date(data.date).toLocaleDateString()}</td>
+                <td class="font-bold">${data.campaignName}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.lpv)}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.searches)}</td>
                 <td class="font-medium text-blue-700">${formatNumber(data.atc)}</td>
@@ -273,10 +300,13 @@
                 const response = await fetch('/api/insights');
                 if (!response.ok) throw new Error('API Error');
                 const data = await response.json();
-                rawDataForCopy = data; // Save data for the copy feature
+                rawDataForCopy = data;
 
                 if (data.length > 0) {
-                    tableBody.innerHTML = data.map(renderTableRow).join('');
+                    // Populate both tables
+                    deliveryTableBody.innerHTML = data.map(renderDeliveryRow).join('');
+                    funnelTableBody.innerHTML = data.map(renderFunnelRow).join('');
+                    
                     runAnalysis(data); 
                     loadingState.style.display = 'none';
                 } else {
