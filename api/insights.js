@@ -1,4 +1,4 @@
-import bizSdk from 'facebook-nodejs-business-sdk';
+const bizSdk = require('facebook-nodejs-business-sdk'); // Use require
 
 const accessToken = process.env.FB_ACCESS_TOKEN;
 const adAccountId = process.env.FB_AD_ACCOUNT_ID;
@@ -24,9 +24,8 @@ const calculateRate = (numerator, denominator) => {
     return (numerator / denominator) * 100;
 };
 
-// --- THIS IS THE FIX ---
-// Changed from 'exports.handler' to Vercel's 'export default async function handler'
-export default async function handler(request, response) {
+// --- THIS IS THE CORRECT VERCEL SYNTAX ---
+module.exports = async (request, response) => {
     if (!accessToken || !adAccountId) {
         return response.status(500).json({ error: 'Facebook API credentials are not configured.' });
     }
@@ -69,11 +68,10 @@ export default async function handler(request, response) {
             };
         });
         
-        // Use response.status().json() to send the data back
         return response.status(200).json(processedData);
 
     } catch (error) {
         console.error('Error fetching from Facebook API:', error);
         return response.status(500).json({ error: 'Failed to fetch data from Facebook Marketing API.' });
     }
-}
+};

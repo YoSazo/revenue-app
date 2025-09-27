@@ -1,4 +1,4 @@
-import axios from 'axios';
+const axios = require('axios'); // Use require
 
 const clientId = process.env.HOTJAR_CLIENT_ID;
 const clientSecret = process.env.HOTJAR_CLIENT_SECRET;
@@ -11,7 +11,6 @@ async function getAccessToken() {
     if (accessToken && Date.now() < tokenExpiry) {
         return accessToken;
     }
-    console.log('Fetching new Hotjar access token from v1 endpoint...');
     try {
         const params = new URLSearchParams();
         params.append('grant_type', 'client_credentials');
@@ -31,9 +30,8 @@ async function getAccessToken() {
     }
 }
 
-// --- THIS IS THE FIX ---
-// Changed from 'exports.handler' to Vercel's 'export default async function handler'
-export default async function handler(request, response) {
+// --- THIS IS THE CORRECT VERCEL SYNTAX ---
+module.exports = async (request, response) => {
     if (!clientId || !clientSecret || !siteId) {
         return response.status(500).json({ error: 'Hotjar credentials or Site ID are not configured.' });
     }
@@ -45,14 +43,10 @@ export default async function handler(request, response) {
         });
         
         const recordings = recordingsResponse.data.data || [];
-        // Use response.status().json() to send the data back
         return response.status(200).json(recordings);
 
     } catch (error) {
-        if (error.response && error.response.status === 403) {
-             console.error('Hotjar API returned 403 Forbidden. Check "recordings:read" scope.');
-        }
         console.error('Error fetching Hotjar recordings:', error.response ? error.response.data : error.message);
         return response.status(500).json({ error: 'Failed to fetch data from Hotjar API.' });
     }
-}
+};
