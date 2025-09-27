@@ -1,21 +1,18 @@
-const bizSdk = require('facebook-nodejs-business-sdk');
+import bizSdk from 'facebook-nodejs-business-sdk';
 
 const accessToken = process.env.FB_ACCESS_TOKEN;
 const adAccountId = process.env.FB_AD_ACCOUNT_ID;
 
-// --- CAMPAIGN ID to Simple Name Mapper ---
 const CAMPAIGN_NAME_MAP = {
   '6898612187193': 'OKC',
   '6898612186993': 'BART',
   '6898612186793': 'TULSA',
 };
 const TARGET_CAMPAIGN_IDS = Object.keys(CAMPAIGN_NAME_MAP);
-// ---------------------------------------------
 
 const Api = bizSdk.FacebookAdsApi.init(accessToken);
 const AdAccount = bizSdk.AdAccount;
 
-// Helper functions (getActionValue, calculateRate) are unchanged...
 const getActionValue = (actions, actionType) => {
     if (!actions) return 0;
     const action = actions.find(a => a.action_type === actionType);
@@ -27,35 +24,22 @@ const calculateRate = (numerator, denominator) => {
     return (numerator / denominator) * 100;
 };
 
-
-exports.handler = async (event) => {
+// --- THIS IS THE FIX ---
+// Changed from 'exports.handler' to Vercel's 'export default async function handler'
+export default async function handler(request, response) {
     if (!accessToken || !adAccountId) {
-        return { statusCode: 500, body: JSON.stringify({ error: 'Facebook API credentials are not configured.' }) };
+        return response.status(500).json({ error: 'Facebook API credentials are not configured.' });
     }
 
     try {
         const account = new AdAccount(adAccountId);
         
-        const fields = [
-            'campaign_id', // Fetching the ID to map it to our simple name
-            'spend',
-            'impressions',
-            'clicks',
-            'ctr',
-            'reach',
-            'frequency',
-            'actions'
-        ];
-        
+        const fields = ['campaign_id', 'spend', 'impressions', 'clicks', 'ctr', 'reach', 'frequency', 'actions'];
         const params = {
             level: 'campaign',
             time_increment: 1,
             date_preset: 'this_week_sun_today',
-            filtering: [{
-                field: 'campaign.id',
-                operator: 'IN',
-                value: TARGET_CAMPAIGN_IDS
-            }]
+            filtering: [{ field: 'campaign.id', operator: 'IN', value: TARGET_CAMPAIGN_IDS }]
         };
 
         const insights = await account.getInsights(fields, params);
@@ -70,7 +54,6 @@ exports.handler = async (event) => {
 
             return {
                 date: insight.date_start,
-                // Use the mapped simple name, or the ID if not found
                 campaignName: CAMPAIGN_NAME_MAP[insight.campaign_id] || insight.campaign_id,
                 spend: parseFloat(insight.spend),
                 impressions: parseInt(insight.impressions, 10),
@@ -78,11 +61,7 @@ exports.handler = async (event) => {
                 ctr: parseFloat(insight.ctr),
                 reach: parseInt(insight.reach, 10),
                 frequency: parseFloat(insight.frequency),
-                lpv,
-                searches,
-                atc,
-                ic,
-                purchases,
+                lpv, searches, atc, ic, purchases,
                 lpvToSearchRate: calculateRate(searches, lpv),
                 searchToAtcRate: calculateRate(atc, searches),
                 atcToIcRate: calculateRate(ic, atc),
@@ -90,16 +69,11 @@ exports.handler = async (event) => {
             };
         });
         
-        return {
-            statusCode: 200,
-            body: JSON.stringify(processedData),
-        };
+        // Use response.status().json() to send the data back
+        return response.status(200).json(processedData);
 
     } catch (error) {
         console.error('Error fetching from Facebook API:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to fetch data from Facebook Marketing API.' }),
-        };
+        return response.status(500).json({ error: 'Failed to fetch data from Facebook Marketing API.' });
     }
-};
+}
