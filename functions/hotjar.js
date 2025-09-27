@@ -15,7 +15,7 @@ async function getAccessToken() {
 
     console.log('Fetching new Hotjar access token...');
     try {
-        const response = await axios.post('https://api.hotjar.com/v2/oauth/token', {
+        const response = await axios.post('https://api.hotjar.io/v2/oauth/token', {
             grant_type: 'client_credentials',
             client_id: clientId,
             client_secret: clientSecret,
@@ -37,7 +37,7 @@ exports.handler = async () => {
 
     try {
         const token = await getAccessToken();
-        const recordingsResponse = await axios.get(`https://api.hotjar.com/v2/sites/${siteId}/recordings?limit=10`, {
+        const recordingsResponse = await axios.get(`https://api.hotjar.io/v2/sites/${siteId}/recordings?limit=10`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
