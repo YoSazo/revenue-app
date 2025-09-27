@@ -38,9 +38,7 @@ module.exports = async (request, response) => {
         ];
         
         const params = {
-            level: 'campaign',
-            time_increment: 1,
-            date_preset: 'this_week_sun_today',
+            level: 'campaign', time_increment: 1, date_preset: 'this_week_sun_today',
             filtering: [{ field: 'campaign.id', operator: 'IN', value: TARGET_CAMPAIGN_IDS }]
         };
 
@@ -52,26 +50,32 @@ module.exports = async (request, response) => {
             const searches = getActionValue(actions, 'search');
             const atc = getActionValue(actions, 'add_to_cart');
             const ic = getActionValue(actions, 'initiate_checkout');
+            // ADDED: Payment Info Adds (PIA)
+            const pia = getActionValue(actions, 'add_payment_info');
             const purchases = getActionValue(actions, 'purchase') + getActionValue(actions, 'offsite_conversion.fb_pixel_purchase');
+            const spend = parseFloat(insight.spend);
 
             return {
                 date: insight.date_start,
                 campaignName: CAMPAIGN_NAME_MAP[insight.campaign_id] || insight.campaign_id,
-                spend: parseFloat(insight.spend),
+                spend: spend,
                 impressions: parseInt(insight.impressions, 10),
                 clicks: parseInt(insight.clicks, 10),
                 ctr: parseFloat(insight.ctr),
                 cpc: parseFloat(insight.cpc || 0),
                 roas: insight.purchase_roas && insight.purchase_roas.length > 0 ? parseFloat(insight.purchase_roas[0].value) : 0,
-                lpv,
-                searches,
-                atc,
-                ic,
-                purchases,
+                cpm: parseFloat(insight.cpm),
+                reach: parseInt(insight.reach, 10),
+                frequency: parseFloat(insight.frequency),
+                costPerPurchase: purchases > 0 ? spend / purchases : 0,
+                // Full funnel numbers
+                lpv, searches, atc, ic, pia, purchases,
+                // Granular funnel rates
                 lpvToSearchRate: calculateRate(searches, lpv),
                 searchToAtcRate: calculateRate(atc, searches),
                 atcToIcRate: calculateRate(ic, atc),
-                icToPurchaseRate: calculateRate(purchases, ic),
+                icToPiaRate: calculateRate(pia, ic),
+                piaToPurchaseRate: calculateRate(purchases, pia),
             };
         });
         
