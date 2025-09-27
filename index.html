@@ -245,6 +245,7 @@
                 aiText += `Campaign: ${row.campaignName}\n`;
                 aiText += `Spend: ${formatCurrency(row.spend)}\n`;
                 aiText += `ROAS: ${formatROAS(row.roas)}\n`;
+                aiText += `CTR: ${formatPercent(row.ctr)}\n`;
                 aiText += `Cost per Purchase: ${formatCurrency(row.costPerPurchase)}\n`;
                 aiText += "Funnel Performance:\n";
                 aiText += `  - Landing Page Views: ${row.lpv}\n`;
