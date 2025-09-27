@@ -186,6 +186,12 @@
         const fetchInsights = async () => {
             try {
                 const response = await fetch('/api/insights');
+                loadingState.innerHTML = '<p>Refreshing data...</p>';
+                loadingState.style.display = 'block';
+                refreshText.textContent = 'Refreshing...';
+            refreshIcon.classList.add('animate-spin');
+            refreshButton.disabled = true;
+
                 if (!response.ok) throw new Error('API Error');
                 const data = await response.json();
                 rawDataForCopy = data;
