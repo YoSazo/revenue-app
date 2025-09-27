@@ -79,9 +79,13 @@
             </div>
         </div>
     </div>
-
+    <div id="message-box" class="hidden fixed top-5 right-5 bg-white border-2 border-black rounded-lg shadow-lg p-4 max-w-sm z-50">
+        <p id="message-text"></p>
+    </div>
 
     <script>
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
         const notificationButton = document.getElementById('enable-notifications');
         const VAPID_PUBLIC_KEY = 'BGej8l1ZGg6FH4CS_fcesa5kxCxgO9dXRgRx5omMVtVKnkQqEHOlxLB5Hw2NsQX0ymV9hxttPog1yq3_4Crv4tI';
         const totalRevenueEl = document.getElementById('total-revenue');
@@ -149,6 +153,15 @@
             });
         };
 
+        function showMessage(message, duration = 3000) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, duration);
+        }
+
+
         const updateDashboard = async (period) => {
             try {
                 hotelsListEl.innerHTML = '<p class="text-center text-gray-500">Loading...</p>';
@@ -194,11 +207,13 @@
             return outputArray;
         }
 
+
         async function enableNotifications() {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                alert('Push Notifications are not supported by your browser.');
+                showMessage('Push Notifications are not supported on this device or browser.');
                 return;
             }
+
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 notificationButton.classList.add('text-emerald-500');
@@ -210,25 +225,37 @@
                         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                     });
                 }
+
                 
                 await fetch('/api/subscribe', {
                     method: 'POST',
                     body: JSON.stringify(subscription),
                     headers: { 'Content-Type': 'application/json' }
                 });
-                alert('Notifications enabled!');
+                showMessage('Notifications enabled!');
             } else {
-                alert('You have blocked notifications.');
+                showMessage('You have blocked notifications.');
             }
         }
 
+
         notificationButton.addEventListener('click', enableNotifications);
+
         
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(() => console.log('Service worker registered.'))
                     .catch(err => console.log('Service worker registration failed: ', err));
+
+
+                    navigator.serviceWorker.ready.then(reg => {
+                    reg.pushManager.getSubscription().then(sub => {
+                        if (sub && Notification.permission === 'granted') {
+                            notificationButton.classList.add('text-emerald-500');
+            }
+                    });
+                });
             });
         }
         
