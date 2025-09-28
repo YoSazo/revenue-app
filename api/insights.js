@@ -38,9 +38,12 @@ module.exports = async (request, response) => {
         ];
         
         const params = {
-            level: 'campaign', time_increment: 1, date_preset: 'this_week_sun_today',
+            level: 'campaign',
+            time_increment: 1,
+            // --- THIS IS THE FIX: Changed to 'last_7d' ---
+            date_preset: 'last_7d',
             filtering: [{ field: 'campaign.id', operator: 'IN', value: TARGET_CAMPAIGN_IDS }]
-        };
+        }
 
         const insights = await account.getInsights(fields, params);
         
