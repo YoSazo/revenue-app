@@ -23,7 +23,7 @@ async function writePurchases(purchases) {
 module.exports = async (request, response) => {
     // Enable CORS
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (request.method === 'OPTIONS') {
@@ -47,6 +47,48 @@ module.exports = async (request, response) => {
         } catch (error) {
             console.error('Error reading purchases:', error);
             return response.status(500).json({ error: 'Failed to read purchases' });
+        }
+    }
+
+    // DELETE method - delete a specific purchase or all purchases
+    if (request.method === 'DELETE') {
+        try {
+            const { orderId } = request.query;
+            
+            // If orderId is 'all', clear all purchases
+            if (orderId === 'all') {
+                await writePurchases([]);
+                return response.status(200).json({
+                    success: true,
+                    message: 'All purchases deleted'
+                });
+            }
+            
+            // Delete specific purchase by orderId
+            if (orderId) {
+                const purchases = await readPurchases();
+                const filteredPurchases = purchases.filter(p => p.orderId !== orderId);
+                
+                if (purchases.length === filteredPurchases.length) {
+                    return response.status(404).json({
+                        error: 'Purchase not found'
+                    });
+                }
+                
+                await writePurchases(filteredPurchases);
+                return response.status(200).json({
+                    success: true,
+                    message: 'Purchase deleted',
+                    orderId
+                });
+            }
+            
+            return response.status(400).json({
+                error: 'Missing orderId parameter'
+            });
+        } catch (error) {
+            console.error('Error deleting purchase:', error);
+            return response.status(500).json({ error: 'Failed to delete purchase' });
         }
     }
 
