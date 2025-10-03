@@ -23,9 +23,9 @@
             
             <!-- Time Period Tabs -->
             <div class="flex gap-2 mb-4">
-                <button class="tab-active px-4 py-2 rounded-full text-sm font-medium transition" data-period="today">Today</button>
+                <button class="tab-inactive px-4 py-2 rounded-full text-sm font-medium transition" data-period="today">Today</button>
                 <button class="tab-inactive px-4 py-2 rounded-full text-sm font-medium transition" data-period="yesterday">Yesterday</button>
-                <button class="tab-inactive px-4 py-2 rounded-full text-sm font-medium transition" data-period="week">This Week</button>
+                <button class="tab-active px-4 py-2 rounded-full text-sm font-medium transition" data-period="week">This Week</button>
             </div>
 
             <!-- Revenue Card -->
@@ -152,35 +152,11 @@
 
     <script>
         let revenueVisible = true;
-        let currentPeriod = 'today';
+        let currentPeriod = 'week'; // default to week
         let allFbData = [];
 
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
         const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
-
-        // Date filtering helper
-        function filterDataByPeriod(data, period) {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const weekAgo = new Date(today);
-            weekAgo.setDate(weekAgo.getDate() - 7);
-
-            return data.filter(row => {
-                const rowDate = new Date(row.date);
-                const rowDateOnly = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate());
-                
-                if (period === 'today') {
-                    return rowDateOnly.getTime() === today.getTime();
-                } else if (period === 'yesterday') {
-                    return rowDateOnly.getTime() === yesterday.getTime();
-                } else if (period === 'week') {
-                    return rowDateOnly >= weekAgo;
-                }
-                return true;
-            });
-        }
 
         // Toggle revenue visibility
         document.getElementById('toggle-revenue').addEventListener('click', () => {
@@ -210,7 +186,7 @@
                 tab.classList.add('tab-active');
                 tab.classList.remove('tab-inactive');
                 currentPeriod = tab.dataset.period;
-                updateDisplay();
+                fetchData(); // Re-fetch with new period
             });
         });
 
@@ -219,7 +195,7 @@
                 // Fetch Facebook Ads data with period parameter
                 const fbResponse = await fetch(`/api/insights?period=${currentPeriod}`);
                 if (!fbResponse.ok) throw new Error('FB API Error');
-                allFbData = await fbResponse.json();
+                const fbData = await fbResponse.json();
                 
                 // Fetch Zapier purchase data
                 const zapierResponse = await fetch('/api/purchase');
@@ -228,26 +204,10 @@
                     zapierData = await zapierResponse.json();
                 }
                 
+                const zapierRevenue = zapierData.totalRevenue || 0;
+                
                 // Display purchases list
                 displayPurchases(zapierData.purchases);
-                
-                // Update display with current period
-                updateDisplay();
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
-
-        function updateDisplay() {
-            // Data is already filtered by API, no need to filter again
-            const fbData = allFbData;
-            
-            // Fetch Zapier data and calculate
-            fetch('/api/purchase')
-                .then(res => res.json())
-                .then(zapierData => {
-                    const zapierRevenue = zapierData.totalRevenue || 0;
                 
                 // Calculate totals from Facebook data
                 const totals = fbData.reduce((acc, row) => {
@@ -297,8 +257,10 @@
                 const avgCpc = fbData.length > 0 ? fbData.reduce((sum, d) => sum + d.cpc, 0) / fbData.length : 0;
                 document.getElementById('cpm').textContent = formatCurrency(avgCpm);
                 document.getElementById('cpc').textContent = formatCurrency(avgCpc);
-                })
-                .catch(error => console.error('Error:', error));
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
 
         function displayPurchases(purchases) {
