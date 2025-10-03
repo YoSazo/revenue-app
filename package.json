@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.8",
-    "facebook-nodejs-business-sdk": "19.0.0"
+    "facebook-nodejs-business-sdk": "19.0.0",
+    "@vercel/kv": "^1.0.1"
   }
 }

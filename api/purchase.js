@@ -1,23 +1,23 @@
 // api/purchase.js
 // This endpoint receives purchase data from Zapier webhooks
-const fs = require('fs').promises;
-const path = require('path');
+const { kv } = require('@vercel/kv');
 
-const PURCHASES_FILE = path.join('/tmp', 'zapier_purchases.json');
+const PURCHASES_KEY = 'zapier_purchases';
 
 // Helper to read purchases
 async function readPurchases() {
     try {
-        const data = await fs.readFile(PURCHASES_FILE, 'utf8');
-        return JSON.parse(data);
+        const purchases = await kv.get(PURCHASES_KEY);
+        return purchases || [];
     } catch (error) {
+        console.error('Error reading from KV:', error);
         return [];
     }
 }
 
 // Helper to write purchases
 async function writePurchases(purchases) {
-    await fs.writeFile(PURCHASES_FILE, JSON.stringify(purchases, null, 2));
+    await kv.set(PURCHASES_KEY, purchases);
 }
 
 module.exports = async (request, response) => {
