@@ -32,6 +32,19 @@ module.exports = async (request, response) => {
     try {
         const account = new AdAccount(adAccountId);
         
+        // Get period from query params (default to 'week')
+        const { period } = request.query;
+        
+        let datePreset = 'last_7d'; // default
+        
+        if (period === 'today') {
+            datePreset = 'today';
+        } else if (period === 'yesterday') {
+            datePreset = 'yesterday';
+        } else if (period === 'week') {
+            datePreset = 'last_7d';
+        }
+        
         const fields = [
             'campaign_id', 'spend', 'impressions', 'clicks', 'ctr', 'cpc',
             'purchase_roas', 'cpm', 'reach', 'frequency', 'actions'
@@ -40,8 +53,7 @@ module.exports = async (request, response) => {
         const params = {
             level: 'campaign',
             time_increment: 1,
-            // --- THIS IS THE FIX: Changed to 'last_7d' ---
-            date_preset: 'last_7d',
+            date_preset: datePreset,
             filtering: [{ field: 'campaign.id', operator: 'IN', value: TARGET_CAMPAIGN_IDS }]
         }
 
@@ -53,7 +65,6 @@ module.exports = async (request, response) => {
             const searches = getActionValue(actions, 'search');
             const atc = getActionValue(actions, 'add_to_cart');
             const ic = getActionValue(actions, 'initiate_checkout');
-            // ADDED: Payment Info Adds (PIA)
             const pia = getActionValue(actions, 'add_payment_info');
             const purchases = getActionValue(actions, 'purchase') + getActionValue(actions, 'offsite_conversion.fb_pixel_purchase');
             const spend = parseFloat(insight.spend);
