@@ -55,15 +55,22 @@ module.exports = async (request, response) => {
         try {
             const { amount, orderId, timestamp, campaignName } = request.body;
 
-            // Validate required fields
-            if (!amount || typeof amount !== 'number') {
+            // Validate and convert amount
+            if (!amount) {
                 return response.status(400).json({ 
-                    error: 'Invalid or missing "amount" field. Must be a number.' 
+                    error: 'Missing "amount" field.' 
+                });
+            }
+
+            const parsedAmount = parseFloat(amount);
+            if (isNaN(parsedAmount)) {
+                return response.status(400).json({ 
+                    error: 'Invalid "amount" field. Must be a valid number.' 
                 });
             }
 
             const purchaseData = {
-                amount: parseFloat(amount),
+                amount: parsedAmount,
                 orderId: orderId || `order_${Date.now()}`,
                 timestamp: timestamp || new Date().toISOString(),
                 campaignName: campaignName || 'Unknown',
