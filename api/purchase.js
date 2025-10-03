@@ -1,23 +1,43 @@
 // api/purchase.js
 // This endpoint receives purchase data from Zapier webhooks
-const { kv } = require('@vercel/kv');
+const { createClient } = require('redis');
 
 const PURCHASES_KEY = 'zapier_purchases';
+
+let client;
+
+async function getRedisClient() {
+    if (!client) {
+        client = createClient({
+            url: process.env.REDIS_URL
+        });
+        client.on('error', (err) => console.error('Redis Client Error', err));
+        await client.connect();
+    }
+    return client;
+}
 
 // Helper to read purchases
 async function readPurchases() {
     try {
-        const purchases = await kv.get(PURCHASES_KEY);
-        return purchases || [];
+        const redis = await getRedisClient();
+        const data = await redis.get(PURCHASES_KEY);
+        return data ? JSON.parse(data) : [];
     } catch (error) {
-        console.error('Error reading from KV:', error);
+        console.error('Error reading from Redis:', error);
         return [];
     }
 }
 
 // Helper to write purchases
 async function writePurchases(purchases) {
-    await kv.set(PURCHASES_KEY, purchases);
+    try {
+        const redis = await getRedisClient();
+        await redis.set(PURCHASES_KEY, JSON.stringify(purchases));
+    } catch (error) {
+        console.error('Error writing to Redis:', error);
+        throw error;
+    }
 }
 
 module.exports = async (request, response) => {
