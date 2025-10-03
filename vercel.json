@@ -3,6 +3,10 @@
     {
       "source": "/api/insights",
       "destination": "/api/insights"
+    },
+    {
+      "source": "/api/purchase",
+      "destination": "/api/purchase"
     }
   ]
 }
