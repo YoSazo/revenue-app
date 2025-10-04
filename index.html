@@ -10,10 +10,26 @@
         body { font-family: 'Inter', sans-serif; }
         .tab-active { background: #10b981; color: white; }
         .tab-inactive { background: white; color: #6b7280; }
+        .fullscreen-mode { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            z-index: 9999; 
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl">
+    <!-- Fullscreen Toggle Button -->
+    <button id="fullscreen-toggle" class="fixed top-4 right-4 z-[10000] bg-blue-600 text-white px-6 py-3 rounded-xl shadow-2xl hover:bg-blue-700 transition flex items-center gap-2 font-semibold">
+        <svg id="expand-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        <svg id="collapse-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+        <span id="fullscreen-text">Fullscreen</span>
+    </button>
+
+    <div id="dashboard-container" class="max-w-md mx-auto min-h-screen bg-white shadow-xl">
         <!-- Header -->
         <div class="bg-white px-4 py-6 border-b">
             <div class="flex justify-between items-center mb-4">
@@ -152,11 +168,35 @@
 
     <script>
         let revenueVisible = true;
-        let currentPeriod = 'week'; // default to week
-        let allFbData = [];
+        let currentPeriod = 'week';
+        let isFullscreen = false;
 
         const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
         const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
+
+        // Fullscreen toggle
+        document.getElementById('fullscreen-toggle').addEventListener('click', () => {
+            const container = document.getElementById('dashboard-container');
+            const expandIcon = document.getElementById('expand-icon');
+            const collapseIcon = document.getElementById('collapse-icon');
+            const fullscreenText = document.getElementById('fullscreen-text');
+            
+            isFullscreen = !isFullscreen;
+            
+            if (isFullscreen) {
+                container.classList.remove('max-w-md', 'mx-auto', 'shadow-xl');
+                container.classList.add('fullscreen-mode', 'max-w-7xl', 'mx-auto', 'px-8');
+                expandIcon.classList.add('hidden');
+                collapseIcon.classList.remove('hidden');
+                fullscreenText.textContent = 'Exit Fullscreen';
+            } else {
+                container.classList.add('max-w-md', 'mx-auto', 'shadow-xl');
+                container.classList.remove('fullscreen-mode', 'max-w-7xl', 'px-8');
+                expandIcon.classList.remove('hidden');
+                collapseIcon.classList.add('hidden');
+                fullscreenText.textContent = 'Fullscreen';
+            }
+        });
 
         // Toggle revenue visibility
         document.getElementById('toggle-revenue').addEventListener('click', () => {
