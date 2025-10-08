@@ -249,17 +249,23 @@
                 if (!fbResponse.ok) throw new Error('FB API Error');
                 const fbData = await fbResponse.json();
                 
-                // Fetch Zapier purchase data
+                // Fetch ALL Zapier purchase data
                 const zapierResponse = await fetch('/api/purchase');
-                let zapierData = { totalRevenue: 0, purchases: [] };
+                let allZapierData = { totalRevenue: 0, purchases: [] };
                 if (zapierResponse.ok) {
-                    zapierData = await zapierResponse.json();
+                    allZapierData = await zapierResponse.json();
                 }
                 
-                const zapierRevenue = zapierData.totalRevenue || 0;
+                // Calculate ALL TIME revenue for progress bar (sum of all purchases)
+                const allTimePurchases = allZapierData.purchases || [];
+                const allTimeZapierRevenue = allTimePurchases.reduce((sum, p) => sum + p.amount, 0);
                 
-                // Display purchases list
-                displayPurchases(zapierData.purchases);
+                // Filter Zapier purchases by current period for display
+                const filteredZapierPurchases = filterPurchasesByPeriod(allTimePurchases, currentPeriod);
+                const periodZapierRevenue = filteredZapierPurchases.reduce((sum, p) => sum + p.amount, 0);
+                
+                // Display purchases list (show all)
+                displayPurchases(allTimePurchases);
                 
                 // Calculate totals from Facebook data
                 const totals = fbData.reduce((acc, row) => {
@@ -274,8 +280,8 @@
                     return acc;
                 }, { spend: 0, lpv: 0, searches: 0, atc: 0, ic: 0, pia: 0, purchases: 0, fbRevenue: 0 });
 
-                // Combine Facebook revenue with Zapier revenue
-                const totalRevenue = totals.fbRevenue + zapierRevenue;
+                // Combine Facebook revenue with FILTERED Zapier revenue for the period
+                const totalRevenue = totals.fbRevenue + periodZapierRevenue;
                 const overallROAS = totals.spend > 0 ? totalRevenue / totals.spend : 0;
 
                 // Update UI
@@ -310,8 +316,53 @@
                 document.getElementById('cpm').textContent = formatCurrency(avgCpm);
                 document.getElementById('cpc').textContent = formatCurrency(avgCpc);
 
+                // Update progress bar with ALL TIME revenue
+                updateProgressBar(allTimeZapierRevenue);
+
             } catch (error) {
                 console.error('Error fetching data:', error);
+            }
+        }
+
+        function filterPurchasesByPeriod(purchases, period) {
+            if (!purchases || purchases.length === 0) return [];
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+
+            return purchases.filter(p => {
+                const purchaseDate = new Date(p.timestamp);
+                const purchaseDateOnly = new Date(purchaseDate.getFullYear(), purchaseDate.getMonth(), purchaseDate.getDate());
+                
+                if (period === 'today') {
+                    return purchaseDateOnly.getTime() === today.getTime();
+                } else if (period === 'yesterday') {
+                    return purchaseDateOnly.getTime() === yesterday.getTime();
+                } else if (period === 'week') {
+                    return purchaseDateOnly >= weekAgo;
+                }
+                return true;
+            });
+        }
+
+        function updateProgressBar(allTimeRevenue) {
+            const goal = 3500;
+            const progressPercent = Math.min((allTimeRevenue / goal) * 100, 100);
+            const remaining = Math.max(goal - allTimeRevenue, 0);
+            
+            document.getElementById('progress-amount').textContent = formatCurrency(allTimeRevenue);
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            
+            if (allTimeRevenue >= goal) {
+                document.getElementById('progress-text').textContent = '🎉 Goal reached!';
+                document.getElementById('progress-text').classList.add('text-green-600', 'font-semibold');
+            } else {
+                document.getElementById('progress-text').textContent = `${formatCurrency(remaining)} remaining`;
+                document.getElementById('progress-text').classList.remove('text-green-600', 'font-semibold');
             }
         }
 
