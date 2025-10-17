@@ -53,8 +53,11 @@ module.exports = async (request, response) => {
         const params = {
             level: 'campaign',
             time_increment: 1,
-            date_preset: datePreset,
             filtering: [{ field: 'campaign.id', operator: 'IN', value: TARGET_CAMPAIGN_IDS }]
+        }
+
+        if (period !== 'all') {
+            params.date_preset = datePreset;
         }
 
         const insights = await account.getInsights(fields, params);

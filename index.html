@@ -33,15 +33,16 @@
         <!-- Header -->
         <div class="bg-white px-4 py-6 border-b">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-bold text-gray-900">iPhone 16 Pro - 7</h1>
+                <h1 class="text-xl font-bold text-gray-900">Rev</h1>
                 <button id="toggle-revenue" class="text-sm font-medium text-blue-600">Hide Revenue</button>
             </div>
             
-            <!-- Time Period Tabs -->
+            <!-- Time Periood Tabs -->
             <div class="flex gap-2 mb-4">
                 <button class="tab-inactive px-4 py-2 rounded-full text-sm font-medium transition" data-period="today">Today</button>
                 <button class="tab-inactive px-4 py-2 rounded-full text-sm font-medium transition" data-period="yesterday">Yesterday</button>
                 <button class="tab-active px-4 py-2 rounded-full text-sm font-medium transition" data-period="week">This Week</button>
+                <button class="tab-inactive px-4 py-2 rounded-full text-sm font-medium transition" data-period="all">All Time</button>
             </div>
 
             <!-- Revenue Card -->
@@ -326,6 +327,10 @@
 
         function filterPurchasesByPeriod(purchases, period) {
             if (!purchases || purchases.length === 0) return [];
+
+            if (period === 'all') {
+                return purchases;
+            }
             
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
