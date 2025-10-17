@@ -4,9 +4,9 @@ const accessToken = process.env.FB_ACCESS_TOKEN;
 const adAccountId = process.env.FB_AD_ACCOUNT_ID;
 
 const CAMPAIGN_NAME_MAP = {
-  '6898612187193': 'OKC',
+  '6907714970993': 'OKC',
   '6898612186993': 'BART',
-  '6898612186793': 'TULSA',
+  '6907714971593': 'TULSA',
 };
 const TARGET_CAMPAIGN_IDS = Object.keys(CAMPAIGN_NAME_MAP);
 
